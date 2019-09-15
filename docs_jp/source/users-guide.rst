@@ -18,6 +18,16 @@ For developers interested in contributing to Hyperledger Fabric CA, see the
 `Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__ for more
 information.
 
+Hyperledger Fabric CAは、Hyperledger Fabricの認証局（CA）です。
+
+次のような機能を提供します。
+
+  * IDの登録、またはユーザーレジストリとしてのLDAPへの接続
+  * 登録証明書（ECerts）の発行
+  * 証明書の更新と失効
+  * Hyperledger Fabric CAは、このドキュメントで後述するように、サーバーコンポーネントとクライアントコンポーネントの両方で構成されています。
+
+Hyperledger Fabric CAへの貢献に関心のある開発者については、`Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__で詳細をご覧ください。
 
 .. _Back to Top:
 
@@ -81,6 +91,8 @@ Overview
 The diagram below illustrates how the Hyperledger Fabric CA server fits into the
 overall Hyperledger Fabric architecture.
 
+次の図は、Hyperledger Fabric CAサーバーがHyperledger Fabricアーキテクチャ全体にどのようにフィットしているかを示しています。
+
 .. image:: ./images/fabric-ca.png
 
 There are two ways of interacting with a Hyperledger Fabric CA server:
@@ -90,23 +102,40 @@ See `fabric-ca/swagger/swagger-fabric-ca.json` for the swagger documentation
 for these REST APIs.
 You may view this documentation via the http://editor2.swagger.io online editor.
 
+Hyperledger Fabric CAサーバーと対話する方法は2つあります。
+HyperledgerFabric CAクライアントを介するやり方と、いくつか存在するFabric SDKのいずれかを介するやりかたです。
+Hyperledger Fabric CAサーバーへのすべての通信は、REST APIを介して行われます。
+これらのREST APIのswaggerドキュメントについては、 `fabric-ca/swagger/swagger-fabric-ca.json` を参照してください。
+このドキュメントは、http://editor2.swagger.io オンラインエディターで表示できます。
+
 The Hyperledger Fabric CA client or SDK may connect to a server in a cluster
 of Hyperledger Fabric CA servers.   This is illustrated in the top right section
 of the diagram. The client routes to an HA Proxy endpoint which load balances
 traffic to one of the fabric-ca-server cluster members.
 
+Hyperledger Fabric CAクライアントまたはSDKは、Hyperledger Fabric CAサーバーのクラスターにあるサーバーに接続できます。
+これは、図の右上のセクションに示されています。
+クライアントはHAプロキシエンドポイントにルーティングします。HAプロキシエンドポイントは、ファブリックCAサーバークラスターメンバーの1つにトラフィックを負荷分散します。
+
 All Hyperledger Fabric CA servers in a cluster share the same database for
 keeping track of identities and certificates.  If LDAP is configured, the identity
 information is kept in LDAP rather than the database.
+
+クラスター内のすべてのHyperledger Fabric CAサーバーは、IDと証明書を追跡するために同じデータベースを共有します。
+LDAPが構成されている場合、ID情報はデータベースではなくLDAPに保持されます。
 
 A server may contain multiple CAs.  Each CA is either a root CA or an
 intermediate CA.  Each intermediate CA has a parent CA which is either a
 root CA or another intermediate CA.
 
+サーバーには複数のCAが含まれる場合があります。
+各CAは、ルートCAまたは中間CAのいずれかです。
+各中間CAには、ルートCAまたは別の中間CAである親CAがあります。
+
 Getting Started
 ---------------
 
-Prerequisites
+前提条件（Prerequisites）
 ~~~~~~~~~~~~~~~
 
 -  Go 1.10+ installation
@@ -115,11 +144,19 @@ Prerequisites
 
 The following installs the libtool dependencies on Ubuntu:
 
+-  Go 1.10以降のインストール
+-  ``GOPATH`` 環境変数が正しく設定されている
+-  libtoolおよびlibtdhl-devパッケージがインストールされています
+
+以下は、Ubuntuにlibtoolの依存関係をインストールします。
+
 .. code:: bash
 
    sudo apt install libtool libltdl-dev
 
 The following installs the libtool dependencies on MacOSX:
+
+以下は、MacOSXにlibtoolの依存関係をインストールします。
 
 .. code:: bash
 
@@ -132,11 +169,19 @@ For more information on libtool, see https://www.gnu.org/software/libtool.
 
 For more information on libltdl-dev, see https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html.
 
-Install
+libtoolの詳細については、以下を参照してください。
+https://www.gnu.org/software/libtool
+
+libltdl-devの詳細については、以下を参照してください。
+https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html
+
+インストール（Install）
 ~~~~~~~
 
 The following installs both the `fabric-ca-server` and `fabric-ca-client` binaries
 in $GOPATH/bin.
+
+以下は、`fabric-ca-server` と `fabric-ca-client`の両方のバイナリを $GOPATH/bin にインストールします。
 
 .. code:: bash
 
@@ -145,6 +190,9 @@ in $GOPATH/bin.
 Note: If you have already cloned the fabric-ca repository, make sure you are on the
 master branch before running the 'go get' command above. Otherwise, you might see the
 following error:
+
+注：fabric-caリポジトリのクローンをすでに作成している場合は、上記の「go get」コマンドを実行する前にmasterブランチにいることを確認してください。
+そうしないと、次のエラーが表示される場合があります。
 
 ::
 
@@ -161,10 +209,12 @@ following error:
 
     package github.com/hyperledger/fabric-ca/cmd/fabric-ca-client: exit status 1
 
-Start Server Natively
+サーバーをネイティブで起動（Start Server Natively）
 ~~~~~~~~~~~~~~~~~~~~~
 
 The following starts the `fabric-ca-server` with default settings.
+
+以下は、デフォルト設定でfabric-ca-serverを開始します。
 
 .. code:: bash
 
@@ -174,10 +224,15 @@ The `-b` option provides the enrollment ID and secret for a bootstrap
 administrator; this is required if LDAP is not enabled with the "ldap.enabled"
 setting.
 
+`-b` オプションは、ブートストラップ管理者の登録IDとシークレットを提供します。 
+これは、LDAPが「ldap.enabled」設定で有効になっていない場合に必要です。
+
 A default configuration file named `fabric-ca-server-config.yaml`
 is created in the local directory which can be customized.
 
-Start Server via Docker
+`fabric-ca-server-config.yaml`という名前のデフォルト設定ファイルが、ローカルディレクトリに作成され、これはカスタマイズできます。
+
+サーバーをDockerで起動（Start Server via Docker）
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Docker Hub
@@ -185,14 +240,25 @@ Docker Hub
 
 Go to: https://hub.docker.com/r/hyperledger/fabric-ca/tags/
 
+以下にアクセスします。
+https://hub.docker.com/r/hyperledger/fabric-ca/tags/
+
 Find the tag that matches the architecture and version of fabric-ca
 that you want to pull.
+
+pullするfabric CAのアーキテクチャとバージョンに一致するタグを見つけます。
 
 Navigate to `$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`
 and open up docker-compose.yml in an editor.
 
+`$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`に移動し、
+エディターで docker-compose.yml を開きます。
+
 Change the `image` line to reflect the tag you found previously. The file
 may look like this for an x86 architecture for version beta.
+
+docker-compose.yml の、`image` の行に、バージョンのtagを反映します。 
+ベータ版のx86アーキテクチャでは、ファイルは次のようになります。
 
 .. code:: yaml
 
@@ -210,6 +276,8 @@ may look like this for an x86 architecture for version beta.
 Open up a terminal in the same directory as the docker-compose.yml file
 and execute the following:
 
+docker-compose.yml ファイルと同じディレクトリでターミナルを開き、次を実行します。
+
 .. code:: bash
 
     # docker-compose up -d
@@ -218,10 +286,15 @@ This will pull down the specified fabric-ca image in the compose file
 if it does not already exist, and start an instance of the fabric-ca
 server.
 
-Building Your Own Docker image
+これにより、構成ファイルに指定された fabric-ca イメージがまだ存在しない場合は pull され、
+fabric-ca サーバーのインスタンスが開始されます。
+
+自分用のDocker Imageをビルドする（Building Your Own Docker image）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can build and start the server via docker-compose as shown below.
+
+以下に示すように、docker-composeを介してサーバーをビルドおよび起動できます。
 
 .. code:: bash
 
@@ -233,6 +306,8 @@ You can build and start the server via docker-compose as shown below.
 The hyperledger/fabric-ca docker image contains both the fabric-ca-server and
 the fabric-ca-client.
 
+hyperledger / fabric-ca の docker image には、fabric-ca-server と fabric-ca-client の両方が含まれています。
+
 .. code:: bash
 
     # cd $GOPATH/src/github.com/hyperledger/fabric-ca
@@ -240,14 +315,19 @@ the fabric-ca-client.
     # cd docker/server
     # docker-compose up -d
 
-Explore the Fabric CA CLI
+Fabric CA CLIを調べる（Explore the Fabric CA CLI）
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section simply provides the usage messages for the Fabric CA server and client
 for convenience.  Additional usage information is provided in following sections.
 
+このセクションでは、Fabric CA サーバーとクライアントのシンプルなusage messageを便宜上提供します。
+さらなる使用法については、次のセクションで説明します。
+
 The following links shows the :doc:`Server Command Line <servercli>` and
 :doc:`Client Command Line <clientcli>`.
+
+次のリンクは、:doc:`Server Command Line <servercli>`と:doc:`Client Command Line <clientcli>`を示しています。
 
 .. note:: Note that command line options that are string slices (lists) can be
           specified either by specifying the option with comma-separated list
@@ -258,23 +338,39 @@ The following links shows the :doc:`Server Command Line <servercli>` and
           ``--csr.hosts host1 --csr.hosts host2``. When using the former format,
           please make sure there are no space before or after any commas.
 
+.. note:: 文字列スライス（リスト）であるコマンドラインオプションは、コンマ区切りのリスト要素でオプションを指定するか、
+          リストを構成する文字列値でオプションを複数回指定することで指定できます。
+          たとえば、``csr.hosts``オプションに``host1``と``host2``を指定するには、
+          ``-csr.hosts 'host1, host2'``または``--csr.hosts host1 --csr.hosts host2``を渡すことができます。
+          1つめの形式を使用する場合は、コンマの前後にスペースがないことを確認してください。
+
 `Back to Top`_
 
-Configuration Settings
+構成設定（Configuration Settings）
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The Fabric CA provides 3 ways to configure settings on the Fabric CA server
 and client. The precedence order is:
 
+Fabric CAは、Fabric CAサーバーとクライアントの設定を構成する3つの方法を提供します。 
+優先順位は次のとおりです。
+
   1. CLI flags
   2. Environment variables
   3. Configuration file
+
+  1. CLIフラグ
+  2. 環境変数
+  3. 構成ファイル
 
 In the remainder of this document, we refer to making changes to
 configuration files. However, configuration file changes can be
 overridden through environment variables or CLI flags.
 
-For example, if we have the following in the client configuration file:
+このドキュメントの残りの部分では、構成ファイルに変更を加えることに言及します。
+ただし、構成ファイルの変更は、環境変数またはCLIフラグによってオーバーライドできます。
+
+たとえば、クライアント構成ファイルに次のものがある場合：
 
 .. code:: yaml
 
@@ -291,12 +387,16 @@ For example, if we have the following in the client configuration file:
 The following environment variable may be used to override the ``cert.pem``
 setting in the configuration file:
 
+次の環境変数を使用して、構成ファイルの ``cert.pem`` 設定をオーバーライドできます。
+
 .. code:: bash
 
   export FABRIC_CA_CLIENT_TLS_CLIENT_CERTFILE=cert2.pem
 
 If we wanted to override both the environment variable and configuration
 file, we can use a command line flag.
+
+環境変数と構成ファイルの両方をオーバーライドする場合は、コマンドラインフラグを使用できます。
 
 .. code:: bash
 
@@ -306,9 +406,12 @@ The same approach applies to fabric-ca-server, except instead of using
 ``FABIRC_CA_CLIENT`` as the prefix to environment variables,
 ``FABRIC_CA_SERVER`` is used.
 
+同じアプローチがfabric-ca-serverに適用されますが、環境変数のプレフィックスとして
+``FABIRC_CA_CLIENT``を使用する代わりに、``FABRIC_CA_SERVER``が使用されます。
+
 .. _server:
 
-A word on file paths
+ファイルパスに関する一言（A word on file paths）
 ^^^^^^^^^^^^^^^^^^^^^
 All the properties in the Fabric CA server and client configuration file
 that specify file names support both relative and absolute paths.
@@ -318,6 +421,16 @@ configuration file is located. For example, if the config directory is
 or client will look for the ``root.pem`` file in the ``~/config``
 directory, ``cert.pem`` file in the ``~/config/certs`` directory and the
 ``key.pem`` file in the ``/abs/path`` directory
+
+ファイル名を指定する Fabric CA サーバーおよびクライアント構成ファイルのすべてのプロパティは、
+相対パスと絶対パスの両方をサポートします。
+相対パスは、構成ファイルが置かれている config ディレクトリーに対する相対パスです。
+たとえば、config ディレクトリが ``~/config`` で、tlsセクションが以下のようになっている場合、
+Fabric CAサーバーまたはクライアントは以下の通り検索します。
+
+``~/config`` ディレクトリの ``root.pem`` ファイル
+``~/config/certs`` ディレクトリの ``cert.pem`` ファイル
+``/abs/path`` ディレクトリの ``key.pem`` ファイル
 
 .. code:: yaml
 
