@@ -949,13 +949,23 @@ Enrolling an intermediate CA
 Upgrading the server
 ~~~~~~~~~~~~~~~~~~~~
 
+サーバーのアップグレード
+
 The Fabric CA server must be upgraded before upgrading the Fabric CA client.
 Prior to upgrade, it is suggested that the current database be backed up:
+
+Fabric CAクライアントをアップグレードする前に、Fabric CAサーバーをアップグレードする必要があります。 
+アップグレードの前に、現在のデータベースをバックアップすることをお勧めします。
 
 - If using sqlite3, backup the current database file (which is named fabric-ca-server.db by default).
 - For other database types, use the appropriate backup/replication mechanism.
 
+- sqlite3を使用している場合、現在のデータベースファイル（デフォルトではfabric-ca-server.dbという名前）をバックアップします。
+- 他のデータベースタイプの場合は、適切なバックアップ/レプリケーションメカニズムを使用します。
+
 To upgrade a single instance of Fabric CA server:
+
+Fabric CAサーバーの単一インスタンスをアップグレードするには：
 
 1. Stop the fabric-ca-server process.
 2. Ensure the current database is backed up.
@@ -963,14 +973,30 @@ To upgrade a single instance of Fabric CA server:
 4. Launch the fabric-ca-server process.
 5. Verify the fabric-ca-server process is available with the following
    command where <host> is the hostname on which the server was started::
+   
+1. fabric-ca-server プロセスを停止します。
+2. 現在のデータベースがバックアップされていることを確認します。
+3. 以前の fabric-ca-server バイナリをアップグレードされたバージョンに置き換えます。
+4. fabric-ca-server プロセスを起動します。
+5. 次のコマンドを使用して、fabric-ca-serverプロセスが使用可能であることを確認します。<host> は、サーバーが起動されたホスト名です。
 
       fabric-ca-client getcainfo -u http://<host>:7054
 
 Upgrading a cluster:
 ^^^^^^^^^^^^^^^^^^^^
+
+クラスターのアップグレード：
+
 To upgrade a cluster of fabric-ca-server instances using either a MySQL or Postgres database, perform the following procedure. We assume that you are using haproxy to load balance to two fabric-ca-server cluster members on host1 and host2, respectively, both listening on port 7054. After this procedure, you will be load balancing to upgraded fabric-ca-server cluster members on host3 and host4 respectively, both listening on port 7054.
 
+MySQL または Postgres データベースを使用して fabric-ca-server インスタンスのクラスターをアップグレードするには、次の手順を実行します。
+haproxyを使用して、それぞれ host1 と host2 の2つの fabric-ca-server クラスターメンバーに負荷分散し、両方ともポート7054でリッスンしていると仮定します。
+この手順の後、両方ともポート7054でリッスンしている host3 と host4 のアップグレードされた fabric-ca-server クラスターメンバーの負荷分散を行います。
+
 In order to monitor the changes using haproxy stats, enable statistics collection. Add the following lines to the global section of the haproxy configuration file:
+
+haproxy統計を使用して変更を監視するには、統計収集を有効にします。 
+haproxy設定ファイルのグローバルセクションに次の行を追加します。
 
 ::
 
@@ -979,9 +1005,13 @@ In order to monitor the changes using haproxy stats, enable statistics collectio
 
 Restart haproxy to pick up the changes::
 
+haproxyを再起動して、変更を有効にします。
+
     # haproxy -f <configfile> -st $(pgrep haproxy)
 
 To display summary information from the haproxy "show stat" command, the following function may prove useful for parsing the copious amount of CSV data returned:
+
+haproxy "show stat"コマンドからの要約情報を表示するには、次の関数から返された大量のCSVデータが解析に役立つことがあります。
 
 .. code:: bash
 
@@ -996,10 +1026,14 @@ To display summary information from the haproxy "show stat" command, the followi
 
 1) Initially your haproxy configuration file is similar to the following::
 
+1) 最初に、haproxy設定ファイルは次のようになります。
+
       server server1 host1:7054 check
       server server2 host2:7054 check
 
    Change this configuration to the following::
+   
+   この構成を次のように変更します。
 
       server server1 host1:7054 check backup
       server server2 host2:7054 check backup
@@ -1008,10 +1042,13 @@ To display summary information from the haproxy "show stat" command, the followi
 
 2) Restart the HA proxy with the new configuration as follows::
 
+2) 次のように、新しい構成でHAプロキシを再起動します。
+
+
       haproxy -f <configfile> -st $(pgrep haproxy)
 
-   ``"haProxyShowStats"`` will now reflect the modified configuration,
-   with two active, older-version backup servers and two (yet to be started) upgraded servers::
+   ``"haProxyShowStats"`` は、2つのアクティブな古いバージョンのバックアップサーバーと
+   2つの（まだ開始されていない）アップグレードされたサーバーで、変更された構成を反映します。
 
       sid   pxname      svname  status  weig  act  bck
         1   fabric-cas  server3   DOWN     1    1    0
@@ -1028,6 +1065,14 @@ To display summary information from the haproxy "show stat" command, the followi
    command that your cluster is still functioning appropriately before proceeding.
    Also, ``"haProxyShowStats"`` should now reflect that all servers are active,
    similar to the following::
+   
+
+3) host3およびhost4にfabric-ca-serverのアップグレードされたバイナリをインストールします。 
+   host3およびhost4の新しいアップグレードされたサーバーは、host1およびhost2の古い対応サーバーと同じデータベースを使用するように構成する必要があります。 
+   アップグレードされたサーバーを起動すると、データベースは自動的に移行されます。 
+   haproxyは、すべての新しいトラフィックがバックアップサーバーとして構成されていないため、アップグレードされたサーバーにすべてのトラフィックを転送します。 
+   先に進む前に、 ``"fabric-ca-client getcainfo"`` コマンドを使用して、クラスターがなお適切に機能していることを確認してください。 
+   また、``"haProxyShowStats"`` は、次のように、すべてのサーバーがアクティブであることを反映する必要があります。
 
       sid   pxname      svname  status  weig  act  bck
         1   fabric-cas  server3    UP     1    1    0
@@ -1041,15 +1086,23 @@ To display summary information from the haproxy "show stat" command, the followi
    server backup configuration from the haproxy configuration file,
    so that it looks similar to the following::
 
+4) host1およびhost2の古いサーバーを停止します。
+   先に進む前に、 ``"fabric-ca-client getcainfo"`` コマンドを使用して、新しいクラスターが適切に機能していることを確認してください。
+   次に、古いサーバーバックアップ構成をhaproxy構成ファイルから削除します。これにより、次のようになります。
+
       server server3 host3:7054 check
       server server4 host4:7054 check
 
 5) Restart the HA proxy with the new configuration as follows::
 
+5) 次のように、新しい構成でHAプロキシを再起動します。
+
       haproxy -f <configfile> -st $(pgrep haproxy)
 
    ``"haProxyShowStats"`` will now reflect the modified configuration,
    with two active servers which have been upgraded to the new version::
+   
+   ``"haProxyShowStats"`` は変更された構成を反映し、新しいバージョンにアップグレードされた2つのアクティブなサーバーを確認できます。
 
       sid   pxname      svname  status  weig  act  bck
         1   fabric-cas  server3   UP       1    1    0
