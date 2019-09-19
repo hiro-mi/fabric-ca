@@ -636,10 +636,12 @@ Elliptic Curve (ECDSA) offers the following key size options:
 | 521    | secp521r1    | ecdsa-with-SHA512     |
 +--------+--------------+-----------------------+
 
-Starting the server
+サーバーを起動する（Starting the server）
 ~~~~~~~~~~~~~~~~~~~
 
 Start the Fabric CA server as follows:
+
+次のようにFabric CAサーバーを起動します。
 
 .. code:: bash
 
@@ -651,17 +653,30 @@ server will generate the ca-cert.pem and ca-key.pem files if they don't
 yet exist and will also create a default configuration file if it does
 not exist.  See the `Initialize the Fabric CA server <#initialize>`__ section.
 
+サーバーがこれまで初期化されていない場合は、初めて起動するときにサーバー自体によって初期化されます。
+この初期化中に、サーバーは ca-cert.pem および ca-key.pem ファイルがまだ存在しない場合は生成し、存在しない場合はデフォルトの構成ファイルも作成します。
+Fabric `CAサーバーの初期化 <#initialize>`__セクションを参照してください。
+
 Unless the Fabric CA server is configured to use LDAP, it must be
 configured with at least one pre-registered bootstrap identity to enable you
 to register and enroll other identities. The ``-b`` option specifies the
 name and password for a bootstrap identity.
 
+Fabric CA server が LDAP を使用するように構成されていない限り、
+少なくとも1つの事前登録されたブートストラップIDで構成して、他のIDを登録、および登録できるようにする必要があります。
+``-b`` オプションは、ブートストラップIDの名前とパスワードを指定します。
+
 To cause the Fabric CA server to listen on ``https`` rather than
 ``http``, set ``tls.enabled`` to ``true``.
+
+Fabric CAサーバーが ``http`` ではなく ``https`` でリッスンするようにするには、 ``tls.enabled`` を ``true`` に設定します。
 
 SECURITY WARNING: The Fabric CA server should always be started with TLS
 enabled (``tls.enabled`` set to true). Failure to do so leaves the
 server vulnerable to an attacker with access to network traffic.
+
+セキュリティ警告：Fabric CA server は、TLSを有効にして（ ``tls.enabled`` を ``true`` に設定して）常に起動する必要があります。
+そうしないと、サーバーがネットワークトラフィックへのアクセス権を持つ攻撃者に対して脆弱になります。
 
 To limit the number of times that the same secret (or password) can be
 used for enrollment, set the ``registry.maxenrollments`` in the configuration
@@ -673,13 +688,24 @@ default value is -1. Setting the value to 0, the Fabric CA server will
 disable enrollment for all identities and registration of identities will
 not be allowed.
 
+同じシークレット（またはパスワード）を登録に使用できる回数を制限するには、構成ファイルの ``registry.maxenrollments`` を適切な値に設定します。
+値を1に設定すると、Fabric CA server は、特定の登録IDに対してパスワードを1回だけ使用することを許可します。
+値を-1に設定すると、Fabric CA server は、登録のためにシークレットを再利用できる回数に制限を設けません。
+デフォルト値は-1です。
+値を0に設定すると、Fabric CAサーバーはすべてのIDの登録を無効にし、IDの登録は許可されません。
+
 The Fabric CA server should now be listening on port 7054.
+
+これで、Fabric CAサーバーはポート7054でリッスンするはずです。
 
 You may skip to the `Fabric CA Client <#fabric-ca-client>`__ section if
 you do not want to configure the Fabric CA server to run in a cluster or
 to use LDAP.
 
-Configuring the database
+Fabric CAサーバーをクラスターで実行したり、LDAPを使用したりしないように設定する場合は、
+`Fabric CA Client <#fabric-ca-client>`__ セクションにスキップできます。
+
+データベースの設定（Configuring the database）
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to configure the Fabric CA server to connect
@@ -687,10 +713,17 @@ to PostgreSQL or MySQL databases. The default database is SQLite and the
 default database file is ``fabric-ca-server.db`` in the Fabric CA
 server's home directory.
 
+このセクションでは、PostgreSQLまたはMySQLデータベースに接続するようにFabric CAサーバーを構成する方法について説明します。
+デフォルトのデータベースはSQLiteで、デフォルトのデータベースファイルはFabric CAサーバーのホームディレクトリにある ``fabric-ca-server.db`` です。
+
 If you don't care about running the Fabric CA server in a cluster, you
 may skip this section; otherwise, you must configure either PostgreSQL or
 MySQL as described below. Fabric CA supports the following database
 versions in a cluster setup:
+
+クラスタでFabric CAサーバーを実行する必要がない場合は、このセクションをスキップできます。 
+それ以外の場合は、以下で説明するようにPostgreSQLまたはMySQLを構成する必要があります。
+ファブリックCAは、クラスターセットアップで次のデータベースバージョンをサポートします。
 
 - PostgreSQL: 9.5.5 or later
 - MySQL: 5.7 or later
@@ -704,6 +737,12 @@ various values appropriately. There are limitations on what characters are allow
 in the database name. Please refer to the following Postgres documentation
 for more information: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 
+PostgreSQLデータベースに接続するために、サーバーの構成ファイルに次のサンプルを追加できます。
+さまざまな値を適切にカスタマイズしてください。
+データベース名に使用できる文字には制限があります。
+詳細については、次のPostgresのドキュメントを参照してください。
+https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+
 .. code:: yaml
 
     db:
@@ -712,6 +751,9 @@ for more information: https://www.postgresql.org/docs/current/static/sql-syntax-
 
 Specifying *sslmode* configures the type of SSL authentication. Valid
 values for sslmode are:
+
+*sslmode* を指定すると、SSL認証のタイプが構成されます。 
+sslmodeの有効な値は次のとおりです。
 
 |
 
@@ -757,6 +799,11 @@ on the PostgreSQL server, then the client certificate and key file must also be
 specified in the ``db.tls.client`` section. The following is an example
 of the ``db.tls`` section:
 
+TLSを使用する場合は、Fabric CAサーバー構成ファイルの ``db.tls`` セクションを指定する必要があります。
+PostgreSQLサーバーでSSLクライアント認証が有効になっている場合は、 ``db.tls.client`` セクションでクライアント証明書と
+キーファイルも指定する必要があります。
+以下は、 ``db.tls`` セクションの例です。
+
 .. code:: yaml
 
     db:
@@ -772,22 +819,38 @@ of the ``db.tls`` section:
 | **certfiles** - A list of PEM-encoded trusted root certificate files.
 | **certfile** and **keyfile** - PEM-encoded certificate and key files that are used by the Fabric CA server to communicate securely with the PostgreSQL server
 
+| **certfiles** - PEMエンコードされた信頼されたルート証明書ファイルのリスト。
+| **certfile** and **keyfile** - PEMエンコードされた証明書とキーファイルで、PostgreSQLサーバーと安全に通信するためにFabric CAサーバーが使用するもの。
+
 PostgreSQL SSL Configuration
 """""""""""""""""""""""""""""
 
 **Basic instructions for configuring SSL on the PostgreSQL server:**
 
+**PostgreSQLサーバーでSSLを構成するための基本的な手順：**
+
 1. In postgresql.conf, uncomment SSL and set to "on" (SSL=on)
 
 2. Place certificate and key files in the PostgreSQL data directory.
 
+1. postgresql.confで、SSLのコメントを外し、「on」に設定します（SSL=on）
+
+2. PostgreSQLデータディレクトリに、証明書とキーファイルを配置します。
+
 Instructions for generating self-signed certificates for:
+https://www.postgresql.org/docs/9.5/static/ssl-tcp.html
+
+自己署名証明書を生成する手順は以下を参照してください。
 https://www.postgresql.org/docs/9.5/static/ssl-tcp.html
 
 Note: Self-signed certificates are for testing purposes and should not
 be used in a production environment
 
+注：自己署名証明書はテスト用であり、実稼働環境では使用しないでください
+
 **PostgreSQL Server - Require Client Certificates**
+
+**PostgreSQLサーバー - クライアント証明書を必要とする**
 
 1. Place certificates of the certificate authorities (CAs) you trust in the file root.crt in the PostgreSQL data directory
 
@@ -795,9 +858,18 @@ be used in a production environment
 
 3. Set the clientcert parameter to 1 on the appropriate hostssl line(s) in pg\_hba.conf.
 
+
+1. 信頼できる認証局（CA）の証明書を、PostgreSQLデータディレクトリのファイル root.crt に配置します。
+
+2. postgresql.conf で、「ssl_ca_file」がクライアントのルート証明書（CA証明書）を指すように設定します
+
+3. pg_hba.conf の適切な hostssl の行で clientcert パラメーターを1に設定します。
+
 For more details on configuring SSL on the PostgreSQL server, please refer
 to the following PostgreSQL documentation:
 https://www.postgresql.org/docs/9.4/static/libpq-ssl.html
+
+PostgreSQLサーバーでSSLを構成する方法の詳細については、以下のPostgreSQLドキュメントを参照してください。https：//www.postgresql.org/docs/9.4/static/libpq-ssl.html
 
 MySQL
 ^^^^^^^
@@ -808,16 +880,31 @@ values appropriately. There are limitations on what characters are allowed
 in the database name. Please refer to the following MySQL documentation
 for more information: https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
 
+MySQLデータベースに接続するために、次のサンプルをFabric CA server構成ファイルに追加できます。
+さまざまな値を適切にカスタマイズしてください。
+データベース名に使用できる文字には制限があります。
+詳細については、以下のMySQLドキュメントを参照してください。
+https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
+
 On MySQL 5.7.X, certain modes affect whether the server permits '0000-00-00' as a valid date.
 It might be necessary to relax the modes that MySQL server uses. We want to allow
 the server to be able to accept zero date values.
 
+MySQL 5.7.Xでは、特定のモードについて、サーバーが「0000-00-00」を有効な日付として許可するかどうかに影響します。
+MySQLサーバーが使用するモードを緩和する必要がある場合があります。
+ですので、サーバーがゼロの日付値を受け入れることができるようにしましょう。
+
 In my.cnf, find the configuration option *sql_mode* and remove *NO_ZERO_DATE* if present.
 Restart MySQL server after making this change.
+
+my.cnfで、構成オプション *sql_mode* を見つけ、NO_ZERO_DATEが存在する場合は削除します。 
+この変更を行った後、MySQLサーバーを再起動します。
 
 Please refer to the following MySQL documentation on different modes available
 and select the appropriate settings for the specific version of MySQL that is
 being used.
+
+使用可能なさまざまなモードに関する次のMySQLドキュメントを参照し、使用されている特定のバージョンのMySQLに適切な設定を選択してください。
 
 https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html
 
@@ -830,10 +917,15 @@ https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html
 If connecting over TLS to the MySQL server, the ``db.tls.client``
 section is also required as described in the **PostgreSQL** section above.
 
+TLS経由でMySQLサーバーに接続する場合、上記の **PostgreSQL** セクションで説明されているように、
+``db.tls.client`` セクションも必要です。
+
 MySQL SSL Configuration
 """"""""""""""""""""""""
 
 **Basic instructions for configuring SSL on MySQL server:**
+
+**MySQLサーバーでSSLを構成するための基本的な手順：**
 
 1. Open or create my.cnf file for the server. Add or uncomment the
    lines below in the [mysqld] section. These should point to the key and
@@ -849,6 +941,21 @@ MySQL SSL Configuration
    mysql> SHOW GLOBAL VARIABLES LIKE 'have\_%ssl';
 
    Should see:
+
+1. サーバーのmy.cnfファイルを開くか作成します。
+   [mysqld]セクションで以下の行を追加またはコメント解除します。
+   これらは、サーバーのキーと証明書、およびルートCA証明書を指している必要があります。
+
+   サーバーおよびクライアント側の証明書の作成手順は以下の通りです。
+   http://dev.mysql.com/doc/refman/5.7/en/creating-ssl-files-using-openssl.html
+
+   [mysqld] ssl-ca = ca-cert.pem ssl-cert = server-cert.pem ssl-key = server-key.pem
+
+   次のクエリを実行して、SSLが有効になっていることを確認できます。
+
+   mysql> SHOW GLOBAL VARIABLES LIKE 'have\_%ssl';
+
+   実行結果は以下のようになるでしょう：
 
    +----------------+----------------+
    | Variable_name  | Value          |
@@ -868,14 +975,30 @@ MySQL SSL Configuration
    If you want to give a specific IP address from which the user will
    access the server change the '%' to the specific IP address.
 
+2. サーバー側のSSL設定が完了したら、次のステップとして、SSL経由でMySQLサーバーにアクセスする権限を持つユーザーを作成します。
+   そのためには、MySQLサーバーにログインし、次のように入力します。
+
+   mysql> GRANT ALL PRIVILEGES ON . TO ‘ssluser’@’%’ IDENTIFIED BY ‘password’ REQUIRE SSL; 
+   mysql> FLUSH PRIVILEGES;
+
+   ユーザーがサーバーにアクセスする特定のIPアドレスを指定する場合は、「%」を特定のIPアドレスに変更します。
+
 **MySQL Server - Require Client Certificates**
 
+**MySQLサーバー - クライアント証明書を必要とする**
+
 Options for secure connections are similar to those used on the server side.
+
+セキュア接続のオプションは、サーバー側で使用されるオプションと似ています。
 
 -  ssl-ca identifies the Certificate Authority (CA) certificate. This
    option, if used, must specify the same certificate used by the server.
 -  ssl-cert identifies MySQL server's certificate.
 -  ssl-key identifies MySQL server's private key.
+
+-  ssl-ca は、認証局（CA）証明書を識別します。このオプションを使用する場合、サーバーが使用する証明書と同じ証明書を指定する必要があります。
+-  ssl-cert は、MySQLサーバーの証明書を識別します。
+-  ssl-key は、MySQLサーバーの秘密鍵を識別します。
 
 Suppose that you want to connect using an account that has no special
 encryption requirements or was created using a GRANT statement that
@@ -884,6 +1007,10 @@ secure-connection options, start the MySQL server with at least
 --ssl-cert and --ssl-key options. Then set the ``db.tls.certfiles`` property
 in the server configuration file and start the Fabric CA server.
 
+特別な暗号化要件のないアカウント、または REQUIRE SSL オプションを含む GRANT ステートメントを使用し、作成されたアカウントで接続するとします。
+推奨されるセキュア接続オプションのセットとして、少なくとも -ssl-cert および -ssl-key オプションを使用してMySQLサーバーを起動します。
+次に、サーバー構成ファイルで ``db.tls.certfiles`` プロパティーを設定し、Fabric CA serverを開始します。
+
 To require that a client certificate also be specified, create the
 account using the REQUIRE X509 option. Then the client must also specify
 proper client key and certificate files; otherwise, the MySQL server
@@ -891,10 +1018,18 @@ will reject the connection. To specify client key and certificate files
 for the Fabric CA server, set the ``db.tls.client.certfile``,
 and ``db.tls.client.keyfile`` configuration properties.
 
+クライアント証明書も指定するように要求するには、REQUIRE X509 オプションを使用してアカウントを作成します。
+次に、クライアントは適切なクライアントキーと証明書ファイルも指定する必要があります。 
+そうしないと、MySQLサーバーは接続を拒否します。
+Fabric CA server のクライアントキーと証明書ファイルを指定するには、 
+``db.tls.client.certfile`` および ``db.tls.client.keyfile`` 構成プロパティを設定します。
+
 Configuring LDAP
 ~~~~~~~~~~~~~~~~
 
 The Fabric CA server can be configured to read from an LDAP server.
+
+Fabric CAサーバーは、LDAPサーバーから読み取るように構成できます。
 
 In particular, the Fabric CA server may connect to an LDAP server to do
 the following:
@@ -902,8 +1037,15 @@ the following:
 -  authenticate an identity prior to enrollment
 -  retrieve an identity's attribute values which are used for authorization.
 
+特に、Fabric CAサーバーはLDAPサーバーに接続して次のことを実行できます。
+
+-  登録前に身元を認証する
+-  認証に使用されるIDの属性値を取得します。
+
 Modify the LDAP section of the Fabric CA server's configuration file to configure the
 server to connect to an LDAP server.
+
+Fabric CAサーバーの構成ファイルのLDAPセクションを変更して、LDAPサーバーに接続するようにサーバーを構成します。
 
 .. code:: yaml
 
@@ -982,11 +1124,40 @@ Where:
     use case is to map a distinguished name associated with an LDAP group to an
     identity type.
 
+Where:
+
+  * ``scheme`` *ldap* もしくは *ldaps*
+  * ``adminDN`` adminユーザーの識別名です。
+  * ``pass`` adminユーザーのパスワードです。
+  * ``host`` LDAPサーバーのホスト名またはIPアドレスです。
+  * ``port`` オプションのポート番号です。デフォルトでは、*ldap* の場合は389、*ldaps* の場合は636です。
+  * ``base`` 検索に使用するLDAPツリーのオプションのルートです。
+  * ``filter`` ログインユーザー名を識別名に変換するために検索するときに使用するフィルターです。
+    たとえば、値 ``(uid=%s)`` は、値がログインユーザー名である ``uid`` 属性の値を持つLDAPエントリを検索します。
+    同様に、 ``(email=%s)`` を使用して電子メールアドレスでログインできます。 
+  * ``LDAPAttrs`` ユーザーに代わってLDAPサーバーから要求するLDAP属性名の配列です。
+  * attribute.convertersセクションは、LDAP属性をファブリックCA属性に変換するために使用されます。
+    * ``fcaAttrName`` ファブリックCA属性の名前です。
+    * ``fcaExpr`` 評価値がファブリックCA属性に割り当てられる式です。
+    たとえば、<LDAPAttrs> が ["uid"]、<fcaAttrName> が 'hf.Revoker' 、<fcaExpr> が 'attr("uid") =~ "revoker*"' であるとします。
+    これは、ユーザーに代わってLDAPサーバーから "uid" という名前の属性が要求されることを意味します。
+    ユーザーの「uid」LDAP属性の値が「revoker」で始まる場合、ユーザーには「hf.Revoker」属性の「true」の値が与えられます。
+    それ以外の場合、ユーザーには「hf.Revoker」属性に「false」の値が与えられます。
+  * the attribute.maps セクションは、LDAP応答値をマップするために使用されます。
+    典型的な使用例は、LDAPグループに関連付けられた識別名をIDタイプにマップすることです。
+
+
 The LDAP expression language uses the govaluate package as described at
 https://github.com/Knetic/govaluate/blob/master/MANUAL.md.  This defines
 operators such as "=~" and literals such as "revoker*", which is a regular
 expression.  The LDAP-specific variables and functions which extend the
 base govaluate language are as follows:
+
+LDAP expression language は、以下で説明されているgovaluateパッケージを使用します。
+https：//github.com/Knetic/govaluate/blob/master/MANUAL.md
+これは、 "=~" などの演算子と、 "revoker*" などのリテラルを定義します。
+これは正規表現です。
+govaluate langage を拡張するLDAP固有の変数と関数は次のとおりです。
 
   * ``DN`` is a variable equal to the user's distinguished name.
   * ``affiliation`` is a variable equal to the user's affiliation.
@@ -1002,15 +1173,35 @@ base govaluate language are as follows:
     must resolve to a boolean value.  If it evaluates to true, the second
     argument is returned; otherwise, the third argument is returned.
 
+  * ``DN`` ユーザーの所属に等しい変数です。
+  * ``affiliation`` ユーザーの識別名に等しい変数です。
+  * ``attr`` 1つまたは2つの引数を取る関数です。 
+    最初の引数はLDAP属性名です。 
+    2番目の引数は、複数の値を1つの文字列に結合するために使用される区切り文字列です。 
+    デフォルトの区切り文字列は "," です。 
+    ``attr`` 関数は、常に 'string' 型の値を返します。
+  * ``map`` mapは2つの引数を取る関数です。 
+    最初の引数は任意の文字列です。 
+    2番目の引数はマップの名前であり、1番目の引数からの文字列の文字列置換を実行するために使用されます。
+  * ``if`` 最初の引数がboolean値に解決される必要がある3つの引数を取る関数です。 
+    trueと評価されると、2番目の引数が返されます。 
+    それ以外の場合、3番目の引数が返されます。
+
 For example, the following expression evaluates to true if the user has
 a distinguished name ending in "O=org1,C=US", or if the user has an affiliation
 beginning with "org1.dept2." and also has the "admin" attribute of "true".
+
+たとえば、ユーザーが "O=org1,C=US" で終わる識別名を持っている場合、
+またはユーザーが "org1.dept2." で始まる所属を持ち、 "admin" 属性が "true" の場合、次の式はtrueと評価されます。
 
   **DN =~ "*O=org1,C=US" || (affiliation =~ "org1.dept2.*" && attr('admin') = 'true')**
 
 NOTE: Since the ``attr`` function always returns a value of type 'string',
 numeric operators may not be used to construct expressions.
 For example, the following is NOT a valid expression:
+
+注： ``attr`` 関数は常に「string」型の値を返すため、数値演算子を使用して式を作成することはできません。 
+たとえば、次は有効な式ではありません。
 
 .. code:: yaml
 
@@ -1019,6 +1210,8 @@ For example, the following is NOT a valid expression:
 Alternatively, a regular expression enclosed in quotes as shown below may be used
 to return an equivalent result:
 
+または、次のように引用符で囲まれた正規表現を使用して、同等の結果を返すこともできます。
+
 .. code:: yaml
 
      value: attr("gidNumber") =~ "1000[0-5]$" || attr("mail") == "root@example.com"
@@ -1026,6 +1219,9 @@ to return an equivalent result:
 The following is a sample configuration section for the default setting
 for the OpenLDAP server whose docker image is at
 ``https://github.com/osixia/docker-openldap``.
+
+以下は、Dockerイメージが以下のURLにあるOpenLDAPサーバーのデフォルト設定のサンプル構成セクションです。
+``https://github.com/osixia/docker-openldap``
 
 .. code:: yaml
 
@@ -1039,8 +1235,11 @@ OpenLDAP docker image, configures it, runs the LDAP tests in
 ``FABRIC_CA/cli/server/ldap/ldap_test.go``, and stops the OpenLDAP
 server.
 
-When LDAP is configured, enrollment works as follows:
+OpenLDAPドッカーイメージを起動し、構成し、 ``FABRIC_CA/cli/server/ldap/ldap_test.go`` でLDAPテストを実行し、
+OpenLDAPサーバーを停止するスクリプトについては、
+``FABRIC_CA/scripts/run-ldap-tests`` を参照してください。
 
+When LDAP is configured, enrollment works as follows:
 
 -  The Fabric CA client or client SDK sends an enrollment request with a
    basic authorization header.
@@ -1050,6 +1249,13 @@ When LDAP is configured, enrollment works as follows:
    configuration file, and then attempts an LDAP bind with the identity's
    password. If the LDAP bind is successful, the enrollment processing is
    authorized and can proceed.
+
+LDAPを構成すると、登録は次のように機能します。
+
+-  Fabric CAクライアントまたはクライアントSDKは、basic認証ヘッダーを含む登録要求を送信します。
+-  Fabric CAサーバーは登録要求を受信し、認証ヘッダーのID名とパスワードをデコードし、
+   構成ファイルの “userfilter”  を使用してID名に関連付けられたDN（識別名）を検索し、IDのパスワードでLDAPバインドを試行します。
+   LDAPバインドが成功すると、登録処理が許可され、続行できます。
 
 Setting up a cluster
 ~~~~~~~~~~~~~~~~~~~~
