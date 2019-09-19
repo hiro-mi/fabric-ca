@@ -1257,13 +1257,18 @@ LDAPを構成すると、登録は次のように機能します。
    構成ファイルの “userfilter”  を使用してID名に関連付けられたDN（識別名）を検索し、IDのパスワードでLDAPバインドを試行します。
    LDAPバインドが成功すると、登録処理が許可され、続行できます。
 
-Setting up a cluster
+
+クラスターのセットアップ（Setting up a cluster）
 ~~~~~~~~~~~~~~~~~~~~
 
 You may use any IP sprayer to load balance to a cluster of Fabric CA
 servers. This section provides an example of how to set up Haproxy to
 route to a Fabric CA server cluster. Be sure to change hostname and port
 to reflect the settings of your Fabric CA servers.
+
+任意のIPスプレイヤーを使用して、ファブリックCAサーバーのクラスターに負荷を分散できます。
+このセクションでは、ファブリックCAサーバークラスターにルーティングするように Haproxy をセットアップする方法の例を示します。
+ファブリックCAサーバーの設定を反映するために、ホスト名とポートを必ず変更してください。
 
 haproxy.conf
 
@@ -1290,12 +1295,19 @@ haproxy.conf
 
 Note: If using TLS, need to use ``mode tcp``.
 
-Setting up multiple CAs
+注：TLSを使用する場合は、 ``mode tcp`` を使用する必要があります。
+
+
+複数のCAのセットアップ（Setting up multiple CAs）
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The fabric-ca server by default consists of a single default CA. However, additional CAs
 can be added to a single server by using `cafiles` or `cacount` configuration options.
 Each additional CA will have its own home directory.
+
+デフォルトでは、fabric-ca サーバーは単一のデフォルトCAで構成されています。
+ただし、 `cafiles` または `cacount` 構成オプションを使用して、追加のCAを単一のサーバーに追加できます。
+追加の各CAには、独自のホームディレクトリがあります。
 
 cacount:
 ^^^^^^^^
@@ -1303,6 +1315,10 @@ cacount:
 The `cacount` provides a quick way to start X number of default additional
 CAs. The home directory will be relative to the server directory. With this option,
 the directory structure will be as follows:
+
+`cacount` は、X個のデフォルトの追加CAをすばやく開始する方法を提供します。
+ホームディレクトリは、サーバーディレクトリに相対的です。
+このオプションを使用すると、ディレクトリ構造は次のようになります。
 
 .. code:: yaml
 
@@ -1316,6 +1332,11 @@ directory, within the configuration file it will contain a unique CA name.
 
 For example, the following command will start 2 default CA instances:
 
+追加の各CAは、そのホームディレクトリに生成されたデフォルトの構成ファイルを取得します。
+構成ファイル内には、一意のCA名が含まれます。
+
+たとえば、次のコマンドは2つのデフォルトCAインスタンスを起動します。
+
 .. code:: bash
 
    fabric-ca-server start -b admin:adminpw --cacount 2
@@ -1326,12 +1347,19 @@ cafiles:
 If absolute paths are not provided when using the cafiles configuration option,
 the CA home directory will be relative to the server directory.
 
+cafiles構成オプションを使用するときに絶対パスが指定されていない場合、CAホームディレクトリはサーバーディレクトリに対して相対的になります。
+
 To use this option, CA configuration files must have already been generated and
 configured for each CA that is to be started. Each configuration file must have
 a unique CA name and Common Name (CN), otherwise the server will fail to start as these
 names must be unique. The CA configuration files will override any default
 CA configuration, and any missing options in the CA configuration files will be
 replaced by the values from the default CA.
+
+このオプションを使用するには、開始するCAごとにCA構成ファイルが既に生成および構成されている必要があります。
+各構成ファイルには一意のCA名と共通名（CN）が必要です。
+そうでない場合、これらの名前は一意である必要があるため、サーバーの起動に失敗します。
+CA構成ファイルは、デフォルトのCA構成をオーバーライドし、CA構成ファイルで欠落しているオプションは、デフォルトのCAの値に置き換えられます。
 
 The precedence order will be as follows:
 
@@ -1341,6 +1369,15 @@ The precedence order will be as follows:
   4. Default CA Configuration file
 
 A CA configuration file must contain at least the following:
+
+優先順位は次のとおりです。
+
+   1. CA設定ファイル
+   2. デフォルトのCA CLIフラグ
+   3. デフォルトのCA環境変数
+   4. デフォルトのCA構成ファイル
+
+CA構成ファイルには、少なくとも次のものが含まれている必要があります。
 
 .. code:: yaml
 
@@ -1353,6 +1390,8 @@ A CA configuration file must contain at least the following:
 
 You may configure your directory structure as follows:
 
+次のようにディレクトリ構造を構成できます。
+
 .. code:: yaml
 
     --<Server Home>
@@ -1364,13 +1403,15 @@ You may configure your directory structure as follows:
 
 For example, the following command will start two customized CA instances:
 
+たとえば、次のコマンドは2つのカスタマイズされたCAインスタンスを起動します。
+
 .. code:: bash
 
     fabric-ca-server start -b admin:adminpw --cafiles ca/ca1/fabric-ca-config.yaml
     --cafiles ca/ca2/fabric-ca-config.yaml
 
 
-Enrolling an intermediate CA
+中間CAの登録（Enrolling an intermediate CA）
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to create a CA signing certificate for an intermediate CA, the intermediate
@@ -1381,11 +1422,18 @@ attribute with a name of "hf.IntermediateCA" and a value of "true".  The CN (or 
 of the issued certificate will be set to the enrollment ID. An error will occur if an intermediate
 CA tries to explicitly specify a CN value.
 
+中間CAのCA署名証明書を作成するには、fabric-ca-clientがCAに登録するのと同じ方法で、中間CAが親CAに登録する必要があります。
+これは、以下に示すように、-u オプションを使用して、親CAのURLと登録IDおよびシークレットを指定することにより行われます。
+この登録IDに関連付けられたIDには、属性として "hf.IntermediateCA" が "true" となっているものが必要となります。
+中間CAがCN値を明示的に指定しようとすると、エラーが発生します。
+
 .. code:: bash
 
     fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
 
 For other intermediate CA flags see `Fabric CA server's configuration file format`_ section.
+
+他の中間CAフラグについては、`Fabric CA server's configuration file format`_ をご覧ください。
 
 
 Upgrading the server
