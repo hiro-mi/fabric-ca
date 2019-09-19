@@ -1,23 +1,6 @@
 Fabric CA User's Guide
 ======================
 
-The Hyperledger Fabric CA is a Certificate Authority (CA)
-for Hyperledger Fabric.
-
-It provides features such as:
-
-  * registration of identities, or connects to LDAP as the user
-    registry
-  * issuance of Enrollment Certificates (ECerts)
-  * certificate renewal and revocation
-
-Hyperledger Fabric CA consists of both a server and a client component as
-described later in this document.
-
-For developers interested in contributing to Hyperledger Fabric CA, see the
-`Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__ for more
-information.
-
 Hyperledger Fabric CAは、Hyperledger Fabricの認証局（CA）です。
 
 次のような機能を提供します。
@@ -88,19 +71,9 @@ Table of Contents
 Overview
 --------
 
-The diagram below illustrates how the Hyperledger Fabric CA server fits into the
-overall Hyperledger Fabric architecture.
-
 次の図は、Hyperledger Fabric CAサーバーがHyperledger Fabricアーキテクチャ全体にどのようにフィットしているかを示しています。
 
 .. image:: ./images/fabric-ca.png
-
-There are two ways of interacting with a Hyperledger Fabric CA server:
-via the Hyperledger Fabric CA client or through one of the Fabric SDKs.
-All communication to the Hyperledger Fabric CA server is via REST APIs.
-See `fabric-ca/swagger/swagger-fabric-ca.json` for the swagger documentation
-for these REST APIs.
-You may view this documentation via the http://editor2.swagger.io online editor.
 
 Hyperledger Fabric CAサーバーと対話する方法は2つあります。
 HyperledgerFabric CAクライアントを介するやり方と、いくつか存在するFabric SDKのいずれかを介するやりかたです。
@@ -108,25 +81,12 @@ Hyperledger Fabric CAサーバーへのすべての通信は、REST APIを介し
 これらのREST APIのswaggerドキュメントについては、 `fabric-ca/swagger/swagger-fabric-ca.json` を参照してください。
 このドキュメントは、http://editor2.swagger.io オンラインエディターで表示できます。
 
-The Hyperledger Fabric CA client or SDK may connect to a server in a cluster
-of Hyperledger Fabric CA servers.   This is illustrated in the top right section
-of the diagram. The client routes to an HA Proxy endpoint which load balances
-traffic to one of the fabric-ca-server cluster members.
-
 Hyperledger Fabric CAクライアントまたはSDKは、Hyperledger Fabric CAサーバーのクラスターにあるサーバーに接続できます。
 これは、図の右上のセクションに示されています。
 クライアントはHAプロキシエンドポイントにルーティングします。HAプロキシエンドポイントは、ファブリックCAサーバークラスターメンバーの1つにトラフィックを負荷分散します。
 
-All Hyperledger Fabric CA servers in a cluster share the same database for
-keeping track of identities and certificates.  If LDAP is configured, the identity
-information is kept in LDAP rather than the database.
-
 クラスター内のすべてのHyperledger Fabric CAサーバーは、IDと証明書を追跡するために同じデータベースを共有します。
 LDAPが構成されている場合、ID情報はデータベースではなくLDAPに保持されます。
-
-A server may contain multiple CAs.  Each CA is either a root CA or an
-intermediate CA.  Each intermediate CA has a parent CA which is either a
-root CA or another intermediate CA.
 
 サーバーには複数のCAが含まれる場合があります。
 各CAは、ルートCAまたは中間CAのいずれかです。
@@ -135,14 +95,10 @@ root CA or another intermediate CA.
 Getting Started
 ---------------
 
-前提条件（Prerequisites）
+Prerequisites
 ~~~~~~~~~~~~~~~
 
--  Go 1.10+ installation
--  ``GOPATH`` environment variable is set correctly
-- libtool and libtdhl-dev packages are installed
-
-The following installs the libtool dependencies on Ubuntu:
+前提条件
 
 -  Go 1.10以降のインストール
 -  ``GOPATH`` 環境変数が正しく設定されている
@@ -154,8 +110,6 @@ The following installs the libtool dependencies on Ubuntu:
 
    sudo apt install libtool libltdl-dev
 
-The following installs the libtool dependencies on MacOSX:
-
 以下は、MacOSXにlibtoolの依存関係をインストールします。
 
 .. code:: bash
@@ -165,31 +119,22 @@ The following installs the libtool dependencies on MacOSX:
 .. note:: libtldl-dev is not necessary on MacOSX if you instal
           libtool via Homebrew
 
-For more information on libtool, see https://www.gnu.org/software/libtool.
-
-For more information on libltdl-dev, see https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html.
-
 libtoolの詳細については、以下を参照してください。
 https://www.gnu.org/software/libtool
 
 libltdl-devの詳細については、以下を参照してください。
 https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html
 
-インストール（Install）
+Install
 ~~~~~~~
 
-The following installs both the `fabric-ca-server` and `fabric-ca-client` binaries
-in $GOPATH/bin.
+インストール
 
 以下は、`fabric-ca-server` と `fabric-ca-client`の両方のバイナリを $GOPATH/bin にインストールします。
 
 .. code:: bash
 
     go get -u github.com/hyperledger/fabric-ca/cmd/...
-
-Note: If you have already cloned the fabric-ca repository, make sure you are on the
-master branch before running the 'go get' command above. Otherwise, you might see the
-following error:
 
 注：fabric-caリポジトリのクローンをすでに作成している場合は、上記の「go get」コマンドを実行する前にmasterブランチにいることを確認してください。
 そうしないと、次のエラーが表示される場合があります。
@@ -209,10 +154,10 @@ following error:
 
     package github.com/hyperledger/fabric-ca/cmd/fabric-ca-client: exit status 1
 
-サーバーをネイティブで起動（Start Server Natively）
+Start Server Natively
 ~~~~~~~~~~~~~~~~~~~~~
 
-The following starts the `fabric-ca-server` with default settings.
+サーバーをネイティブで起動
 
 以下は、デフォルト設定でfabric-ca-serverを開始します。
 
@@ -220,42 +165,26 @@ The following starts the `fabric-ca-server` with default settings.
 
     fabric-ca-server start -b admin:adminpw
 
-The `-b` option provides the enrollment ID and secret for a bootstrap
-administrator; this is required if LDAP is not enabled with the "ldap.enabled"
-setting.
-
 `-b` オプションは、ブートストラップ管理者の登録IDとシークレットを提供します。 
 これは、LDAPが「ldap.enabled」設定で有効になっていない場合に必要です。
 
-A default configuration file named `fabric-ca-server-config.yaml`
-is created in the local directory which can be customized.
-
 `fabric-ca-server-config.yaml`という名前のデフォルト設定ファイルが、ローカルディレクトリに作成され、これはカスタマイズできます。
 
-サーバーをDockerで起動（Start Server via Docker）
+Start Server via Docker
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+サーバーをDockerで起動
 
 Docker Hub
 ^^^^^^^^^^^^
 
-Go to: https://hub.docker.com/r/hyperledger/fabric-ca/tags/
-
 以下にアクセスします。
 https://hub.docker.com/r/hyperledger/fabric-ca/tags/
 
-Find the tag that matches the architecture and version of fabric-ca
-that you want to pull.
-
 pullするfabric CAのアーキテクチャとバージョンに一致するタグを見つけます。
-
-Navigate to `$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`
-and open up docker-compose.yml in an editor.
 
 `$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`に移動し、
 エディターで docker-compose.yml を開きます。
-
-Change the `image` line to reflect the tag you found previously. The file
-may look like this for an x86 architecture for version beta.
 
 docker-compose.yml の、`image` の行に、バージョンのtagを反映します。 
 ベータ版のx86アーキテクチャでは、ファイルは次のようになります。
@@ -273,26 +202,19 @@ docker-compose.yml の、`image` の行に、バージョンのtagを反映し�
         - "./fabric-ca-server:/etc/hyperledger/fabric-ca-server"
       command: sh -c 'fabric-ca-server start -b admin:adminpw'
 
-Open up a terminal in the same directory as the docker-compose.yml file
-and execute the following:
-
 docker-compose.yml ファイルと同じディレクトリでターミナルを開き、次を実行します。
 
 .. code:: bash
 
     # docker-compose up -d
 
-This will pull down the specified fabric-ca image in the compose file
-if it does not already exist, and start an instance of the fabric-ca
-server.
-
 これにより、構成ファイルに指定された fabric-ca イメージがまだ存在しない場合は pull され、
 fabric-ca サーバーのインスタンスが開始されます。
 
-自分用のDocker Imageをビルドする（Building Your Own Docker image）
+Building Your Own Docker image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can build and start the server via docker-compose as shown below.
+自分用のDocker Imageをビルドする
 
 以下に示すように、docker-composeを介してサーバーをビルドおよび起動できます。
 
@@ -303,10 +225,7 @@ You can build and start the server via docker-compose as shown below.
     cd docker/server
     docker-compose up -d
 
-The hyperledger/fabric-ca docker image contains both the fabric-ca-server and
-the fabric-ca-client.
-
-hyperledger / fabric-ca の docker image には、fabric-ca-server と fabric-ca-client の両方が含まれています。
+hyperledger/fabric-ca の docker image には、fabric-ca-server と fabric-ca-client の両方が含まれています。
 
 .. code:: bash
 
@@ -315,28 +234,15 @@ hyperledger / fabric-ca の docker image には、fabric-ca-server と fabric-ca
     # cd docker/server
     # docker-compose up -d
 
-Fabric CA CLIを調べる（Explore the Fabric CA CLI）
+Explore the Fabric CA CLI
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section simply provides the usage messages for the Fabric CA server and client
-for convenience.  Additional usage information is provided in following sections.
+Fabric CA CLIを調べる
 
 このセクションでは、Fabric CA サーバーとクライアントのシンプルなusage messageを便宜上提供します。
 さらなる使用法については、次のセクションで説明します。
 
-The following links shows the :doc:`Server Command Line <servercli>` and
-:doc:`Client Command Line <clientcli>`.
-
 次のリンクは、:doc:`Server Command Line <servercli>`と:doc:`Client Command Line <clientcli>`を示しています。
-
-.. note:: Note that command line options that are string slices (lists) can be
-          specified either by specifying the option with comma-separated list
-          elements or by specifying the option multiple times, each with a
-          string value that make up the list. For example, to specify
-          ``host1`` and ``host2`` for the ``csr.hosts`` option, you can either
-          pass ``--csr.hosts 'host1,host2'`` or
-          ``--csr.hosts host1 --csr.hosts host2``. When using the former format,
-          please make sure there are no space before or after any commas.
 
 .. note:: 文字列スライス（リスト）であるコマンドラインオプションは、コンマ区切りのリスト要素でオプションを指定するか、
           リストを構成する文字列値でオプションを複数回指定することで指定できます。
@@ -346,26 +252,17 @@ The following links shows the :doc:`Server Command Line <servercli>` and
 
 `Back to Top`_
 
-構成設定（Configuration Settings）
+Configuration Settings
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The Fabric CA provides 3 ways to configure settings on the Fabric CA server
-and client. The precedence order is:
+構成設定
 
 Fabric CAは、Fabric CAサーバーとクライアントの設定を構成する3つの方法を提供します。 
 優先順位は次のとおりです。
 
-  1. CLI flags
-  2. Environment variables
-  3. Configuration file
-
   1. CLIフラグ
   2. 環境変数
   3. 構成ファイル
-
-In the remainder of this document, we refer to making changes to
-configuration files. However, configuration file changes can be
-overridden through environment variables or CLI flags.
 
 このドキュメントの残りの部分では、構成ファイルに変更を加えることに言及します。
 ただし、構成ファイルの変更は、環境変数またはCLIフラグによってオーバーライドできます。
@@ -384,17 +281,11 @@ overridden through environment variables or CLI flags.
         certfile: cert.pem
         keyfile:
 
-The following environment variable may be used to override the ``cert.pem``
-setting in the configuration file:
-
 次の環境変数を使用して、構成ファイルの ``cert.pem`` 設定をオーバーライドできます。
 
 .. code:: bash
 
   export FABRIC_CA_CLIENT_TLS_CLIENT_CERTFILE=cert2.pem
-
-If we wanted to override both the environment variable and configuration
-file, we can use a command line flag.
 
 環境変数と構成ファイルの両方をオーバーライドする場合は、コマンドラインフラグを使用できます。
 
@@ -402,25 +293,15 @@ file, we can use a command line flag.
 
   fabric-ca-client enroll --tls.client.certfile cert3.pem
 
-The same approach applies to fabric-ca-server, except instead of using
-``FABIRC_CA_CLIENT`` as the prefix to environment variables,
-``FABRIC_CA_SERVER`` is used.
-
 同じアプローチがfabric-ca-serverに適用されますが、環境変数のプレフィックスとして
 ``FABIRC_CA_CLIENT``を使用する代わりに、``FABRIC_CA_SERVER``が使用されます。
 
 .. _server:
 
-ファイルパスに関する一言（A word on file paths）
+A word on file paths
 ^^^^^^^^^^^^^^^^^^^^^
-All the properties in the Fabric CA server and client configuration file
-that specify file names support both relative and absolute paths.
-Relative paths are relative to the config directory, where the
-configuration file is located. For example, if the config directory is
-``~/config`` and the tls section is as shown below, the Fabric CA server
-or client will look for the ``root.pem`` file in the ``~/config``
-directory, ``cert.pem`` file in the ``~/config/certs`` directory and the
-``key.pem`` file in the ``/abs/path`` directory
+
+ファイルパスに関する一言
 
 ファイル名を指定する Fabric CA サーバーおよびクライアント構成ファイルのすべてのプロパティは、
 相対パスと絶対パスの両方をサポートします。
@@ -449,26 +330,10 @@ Fabric CAサーバーまたはクライアントは以下の通り検索しま�
 Fabric CA Server
 ----------------
 
-This section describes the Fabric CA server.
-
 このセクションでは、Fabric CA serverについて説明します。
-
-You may initialize the Fabric CA server before starting it. This provides an
-opportunity for you to generate a default configuration file that can be
-reviewed and customized before starting the server.
 
 Fabric CA serverを開始する前に初期化できます。 
 これにより、サーバーを起動する前に確認およびカスタマイズできるデフォルトの構成ファイルを生成できます。
-
-The Fabric CA server's home directory is determined as follows:
-  - if the --home command line option is set, use its value
-  - otherwise, if the ``FABRIC_CA_SERVER_HOME`` environment variable is set, use
-    its value
-  - otherwise, if ``FABRIC_CA_HOME`` environment variable is set, use
-    its value
-  - otherwise, if the ``CA_CFG_PATH`` environment variable is set, use
-    its value
-  - otherwise, use current working directory
 
 Fabric CA server のホームディレクトリは、次のように決定されます。
   - –homeコマンドラインオプションが設定されている場合は、その値を使用します
@@ -477,25 +342,18 @@ Fabric CA server のホームディレクトリは、次のように決定され
   - それ以外の場合、 ``CA_CFG_PATH`` 環境変数が設定されている場合は、その値を使用します
   - それ以外の場合は、現在の作業ディレクトリを使用します
 
-For the remainder of this server section, we assume that you have set
-the ``FABRIC_CA_HOME`` environment variable to
-``$HOME/fabric-ca/server``.
-
 このサーバーセクションの残りの部分では、 ``FABRIC_CA_HOME`` 環境変数を
 以下のように設定していることを前提としています。
 ``$HOME/fabric-ca/server``
-
-The instructions below assume that the server configuration file exists
-in the server's home directory.
 
 以下の手順は、サーバー構成ファイルがサーバーのホームディレクトリに存在することを前提としています。
 
 .. _initialize:
 
-サーバーの初期化（Initializing the server）
+Initializing the server
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Initialize the Fabric CA server as follows:
+サーバーの初期化
 
 以下のようにFabric CA serverを初期化します。
 
@@ -503,15 +361,8 @@ Initialize the Fabric CA server as follows:
 
     fabric-ca-server init -b admin:adminpw
 
-The ``-b`` (bootstrap identity) option is required for initialization when
-LDAP is disabled. At least one bootstrap identity is required to start the
-Fabric CA server; this identity is the server administrator.
-
 LDAPが無効になっている場合、初期化には ``-b`` (bootstrap identity) オプションが必要です。 
 Fabric CA serverを起動するには、少なくとも1つのbootstrap identityが必要です。 このIDはサーバー管理者です。
-
-The server configuration file contains a Certificate Signing Request (CSR)
-section that can be configured. The following is a sample CSR.
 
 サーバー構成ファイルには、構成可能な証明書署名要求（CSR:Certificate Signing Request）セクションが含まれています。 
 以下はCSRのサンプルです。
@@ -534,21 +385,9 @@ section that can be configured. The following is a sample CSR.
       expiry: 131400h
       pathlength: 1
 
-All of the fields above pertain to the X.509 signing key and certificate which
-is generated by the ``fabric-ca-server init``.  This corresponds to the
-``ca.certfile`` and ``ca.keyfile`` files in the server's configuration file.
-The fields are as follows:
-
 上記のすべてのフィールドは、 ``fabric-ca-server init`` によって生成されるX.509署名鍵と証明書に関係しています。 
 これは、サーバーの構成ファイルの ``ca.certfile`` および ``ca.keyfile`` ファイルに対応します。 
 フィールドは次のとおりです。
-
-  -  **cn** is the Common Name
-  -  **O** is the organization name
-  -  **OU** is the organizational unit
-  -  **L** is the location or city
-  -  **ST** is the state
-  -  **C** is the country
 
   -  **cn** は一般名（Common Name）です
   -  **O** は組織名（organization name）です
@@ -557,25 +396,9 @@ The fields are as follows:
   -  **ST** は状態（state）です
   -  **C** は国（country）です
 
-If custom values for the CSR are required, you may customize the configuration
-file, delete the files specified by the ``ca.certfile`` and ``ca.keyfile``
-configuration items, and then run the ``fabric-ca-server init -b admin:adminpw``
-command again.
-
 CSRのカスタム値が必要な場合は、構成ファイルをカスタマイズし、
  ``ca.certfile`` および ``ca.keyfile`` 構成アイテムで指定されたファイルを削除してから、
  ``fabric-ca-server init -b admin：adminpw`` コマンドを再度実行します。
-
-The ``fabric-ca-server init`` command generates a self-signed CA certificate
-unless the ``-u <parent-fabric-ca-server-URL>`` option is specified.
-If the ``-u`` is specified, the server's CA certificate is signed by the
-parent Fabric CA server.
-In order to authenticate to the parent Fabric CA server, the URL must
-be of the form ``<scheme>://<enrollmentID>:<secret>@<host>:<port>``, where
-<enrollmentID> and <secret> correspond to an identity with an 'hf.IntermediateCA'
-attribute whose value equals 'true'.
-The ``fabric-ca-server init`` command also generates a default configuration
-file named **fabric-ca-server-config.yaml** in the server's home directory.
 
 ``fabric-ca-server init`` コマンドは、 ``-u <parent-fabric-ca-server-URL>`` オプションが指定されていない限り、
 自己署名CA証明書を生成します。
@@ -585,27 +408,12 @@ file named **fabric-ca-server-config.yaml** in the server's home directory.
 ``fabric-ca-server init`` コマンドは、サーバーのホームディレクトリに
 **fabric-ca-server-config.yaml** という名前のデフォルト構成ファイルも生成します。
 
-If you want the Fabric CA server to use a CA signing certificate and key file which you provide,
-you must place your files in the location referenced by ``ca.certfile`` and ``ca.keyfile`` respectively.
-Both files must be PEM-encoded and must not be encrypted.
-More specifically, the contents of the CA certificate file must begin with ``-----BEGIN CERTIFICATE-----``
-and the contents of the key file must begin with ``-----BEGIN PRIVATE KEY-----`` and not
-``-----BEGIN ENCRYPTED PRIVATE KEY-----``.
-
 提供するCA署名証明書とキーファイルをFabric CA server で使用する場合は、
 ``ca.certfile`` と ``ca.keyfile`` でそれぞれ参照される場所にファイルを配置する必要があります。
 両方のファイルはPEMエンコードされている必要があり、暗号化されていてはなりません。
 より具体的には、CA証明書ファイルの内容は ``----- BEGIN CERTIFICATE -----`` で始まり、
 キーファイルの内容は ``----- BEGIN PRIVATE KEY -----`` で始まる必要があります。
 ``-----BEGIN ENCRYPTED PRIVATE KEY-----`` ではありません。
-
-Algorithms and key sizes
-
-The CSR can be customized to generate X.509 certificates and keys that
-support Elliptic Curve (ECDSA). The following setting is an
-example of the implementation of Elliptic Curve Digital Signature
-Algorithm (ECDSA) with curve ``prime256v1`` and signature algorithm
-``ecdsa-with-SHA256``:
 
 アルゴリズムとキーサイズ
 
@@ -617,10 +425,6 @@ CSRは、楕円曲線（ECDSA）をサポートするX.509証明書とキーを�
     key:
        algo: ecdsa
        size: 256
-
-The choice of algorithm and key size are based on security needs.
-
-Elliptic Curve (ECDSA) offers the following key size options:
 
 アルゴリズムとキーサイズの選択は、セキュリティのニーズに基づいています。
 
@@ -636,10 +440,10 @@ Elliptic Curve (ECDSA) offers the following key size options:
 | 521    | secp521r1    | ecdsa-with-SHA512     |
 +--------+--------------+-----------------------+
 
-サーバーを起動する（Starting the server）
+Starting the server
 ~~~~~~~~~~~~~~~~~~~
 
-Start the Fabric CA server as follows:
+サーバーを起動する
 
 次のようにFabric CAサーバーを起動します。
 
@@ -647,46 +451,18 @@ Start the Fabric CA server as follows:
 
     fabric-ca-server start -b <admin>:<adminpw>
 
-If the server has not been previously initialized, it will initialize
-itself as it starts for the first time.  During this initialization, the
-server will generate the ca-cert.pem and ca-key.pem files if they don't
-yet exist and will also create a default configuration file if it does
-not exist.  See the `Initialize the Fabric CA server <#initialize>`__ section.
-
 サーバーがこれまで初期化されていない場合は、初めて起動するときにサーバー自体によって初期化されます。
 この初期化中に、サーバーは ca-cert.pem および ca-key.pem ファイルがまだ存在しない場合は生成し、存在しない場合はデフォルトの構成ファイルも作成します。
 Fabric `CAサーバーの初期化 <#initialize>`__セクションを参照してください。
-
-Unless the Fabric CA server is configured to use LDAP, it must be
-configured with at least one pre-registered bootstrap identity to enable you
-to register and enroll other identities. The ``-b`` option specifies the
-name and password for a bootstrap identity.
 
 Fabric CA server が LDAP を使用するように構成されていない限り、
 少なくとも1つの事前登録されたブートストラップIDで構成して、他のIDを登録、および登録できるようにする必要があります。
 ``-b`` オプションは、ブートストラップIDの名前とパスワードを指定します。
 
-To cause the Fabric CA server to listen on ``https`` rather than
-``http``, set ``tls.enabled`` to ``true``.
-
 Fabric CAサーバーが ``http`` ではなく ``https`` でリッスンするようにするには、 ``tls.enabled`` を ``true`` に設定します。
-
-SECURITY WARNING: The Fabric CA server should always be started with TLS
-enabled (``tls.enabled`` set to true). Failure to do so leaves the
-server vulnerable to an attacker with access to network traffic.
 
 セキュリティ警告：Fabric CA server は、TLSを有効にして（ ``tls.enabled`` を ``true`` に設定して）常に起動する必要があります。
 そうしないと、サーバーがネットワークトラフィックへのアクセス権を持つ攻撃者に対して脆弱になります。
-
-To limit the number of times that the same secret (or password) can be
-used for enrollment, set the ``registry.maxenrollments`` in the configuration
-file to the appropriate value. If you set the value to 1, the Fabric CA
-server allows passwords to only be used once for a particular enrollment
-ID. If you set the value to -1, the Fabric CA server places no limit on
-the number of times that a secret can be reused for enrollment. The
-default value is -1. Setting the value to 0, the Fabric CA server will
-disable enrollment for all identities and registration of identities will
-not be allowed.
 
 同じシークレット（またはパスワード）を登録に使用できる回数を制限するには、構成ファイルの ``registry.maxenrollments`` を適切な値に設定します。
 値を1に設定すると、Fabric CA server は、特定の登録IDに対してパスワードを1回だけ使用することを許可します。
@@ -694,32 +470,18 @@ not be allowed.
 デフォルト値は-1です。
 値を0に設定すると、Fabric CAサーバーはすべてのIDの登録を無効にし、IDの登録は許可されません。
 
-The Fabric CA server should now be listening on port 7054.
-
 これで、Fabric CAサーバーはポート7054でリッスンするはずです。
-
-You may skip to the `Fabric CA Client <#fabric-ca-client>`__ section if
-you do not want to configure the Fabric CA server to run in a cluster or
-to use LDAP.
 
 Fabric CAサーバーをクラスターで実行したり、LDAPを使用したりしないように設定する場合は、
 `Fabric CA Client <#fabric-ca-client>`__ セクションにスキップできます。
 
-データベースの設定（Configuring the database）
+Configuring the database
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section describes how to configure the Fabric CA server to connect
-to PostgreSQL or MySQL databases. The default database is SQLite and the
-default database file is ``fabric-ca-server.db`` in the Fabric CA
-server's home directory.
+データベースの設定
 
 このセクションでは、PostgreSQLまたはMySQLデータベースに接続するようにFabric CAサーバーを構成する方法について説明します。
 デフォルトのデータベースはSQLiteで、デフォルトのデータベースファイルはFabric CAサーバーのホームディレクトリにある ``fabric-ca-server.db`` です。
-
-If you don't care about running the Fabric CA server in a cluster, you
-may skip this section; otherwise, you must configure either PostgreSQL or
-MySQL as described below. Fabric CA supports the following database
-versions in a cluster setup:
 
 クラスタでFabric CAサーバーを実行する必要がない場合は、このセクションをスキップできます。 
 それ以外の場合は、以下で説明するようにPostgreSQLまたはMySQLを構成する必要があります。
@@ -730,12 +492,6 @@ versions in a cluster setup:
 
 PostgreSQL
 ^^^^^^^^^^
-
-The following sample may be added to the server's configuration file in
-order to connect to a PostgreSQL database. Be sure to customize the
-various values appropriately. There are limitations on what characters are allowed
-in the database name. Please refer to the following Postgres documentation
-for more information: https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 
 PostgreSQLデータベースに接続するために、サーバーの構成ファイルに次のサンプルを追加できます。
 さまざまな値を適切にカスタマイズしてください。
@@ -748,9 +504,6 @@ https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTA
     db:
       type: postgres
       datasource: host=localhost port=5432 user=Username password=Password dbname=fabric_ca sslmode=verify-full
-
-Specifying *sslmode* configures the type of SSL authentication. Valid
-values for sslmode are:
 
 *sslmode* を指定すると、SSL認証のタイプが構成されます。 
 sslmodeの有効な値は次のとおりです。
@@ -793,12 +546,6 @@ sslmodeの有効な値は次のとおりです。
 
 |
 
-If you would like to use TLS, then the ``db.tls`` section in the Fabric CA server
-configuration file must be specified. If SSL client authentication is enabled
-on the PostgreSQL server, then the client certificate and key file must also be
-specified in the ``db.tls.client`` section. The following is an example
-of the ``db.tls`` section:
-
 TLSを使用する場合は、Fabric CAサーバー構成ファイルの ``db.tls`` セクションを指定する必要があります。
 PostgreSQLサーバーでSSLクライアント認証が有効になっている場合は、 ``db.tls.client`` セクションでクライアント証明書と
 キーファイルも指定する必要があります。
@@ -816,48 +563,24 @@ PostgreSQLサーバーでSSLクライアント認証が有効になっている�
                 certfile: db-client-cert.pem
                 keyfile: db-client-key.pem
 
-| **certfiles** - A list of PEM-encoded trusted root certificate files.
-| **certfile** and **keyfile** - PEM-encoded certificate and key files that are used by the Fabric CA server to communicate securely with the PostgreSQL server
-
 | **certfiles** - PEMエンコードされた信頼されたルート証明書ファイルのリスト。
 | **certfile** and **keyfile** - PEMエンコードされた証明書とキーファイルで、PostgreSQLサーバーと安全に通信するためにFabric CAサーバーが使用するもの。
 
 PostgreSQL SSL Configuration
 """""""""""""""""""""""""""""
 
-**Basic instructions for configuring SSL on the PostgreSQL server:**
-
 **PostgreSQLサーバーでSSLを構成するための基本的な手順：**
-
-1. In postgresql.conf, uncomment SSL and set to "on" (SSL=on)
-
-2. Place certificate and key files in the PostgreSQL data directory.
 
 1. postgresql.confで、SSLのコメントを外し、「on」に設定します（SSL=on）
 
 2. PostgreSQLデータディレクトリに、証明書とキーファイルを配置します。
 
-Instructions for generating self-signed certificates for:
-https://www.postgresql.org/docs/9.5/static/ssl-tcp.html
-
 自己署名証明書を生成する手順は以下を参照してください。
 https://www.postgresql.org/docs/9.5/static/ssl-tcp.html
 
-Note: Self-signed certificates are for testing purposes and should not
-be used in a production environment
-
 注：自己署名証明書はテスト用であり、実稼働環境では使用しないでください
 
-**PostgreSQL Server - Require Client Certificates**
-
 **PostgreSQLサーバー - クライアント証明書を必要とする**
-
-1. Place certificates of the certificate authorities (CAs) you trust in the file root.crt in the PostgreSQL data directory
-
-2. In postgresql.conf, set "ssl\_ca\_file" to point to the root cert of the client (CA cert)
-
-3. Set the clientcert parameter to 1 on the appropriate hostssl line(s) in pg\_hba.conf.
-
 
 1. 信頼できる認証局（CA）の証明書を、PostgreSQLデータディレクトリのファイル root.crt に配置します。
 
@@ -865,20 +588,10 @@ be used in a production environment
 
 3. pg_hba.conf の適切な hostssl の行で clientcert パラメーターを1に設定します。
 
-For more details on configuring SSL on the PostgreSQL server, please refer
-to the following PostgreSQL documentation:
-https://www.postgresql.org/docs/9.4/static/libpq-ssl.html
-
 PostgreSQLサーバーでSSLを構成する方法の詳細については、以下のPostgreSQLドキュメントを参照してください。https：//www.postgresql.org/docs/9.4/static/libpq-ssl.html
 
 MySQL
 ^^^^^^^
-
-The following sample may be added to the Fabric CA server configuration file in
-order to connect to a MySQL database. Be sure to customize the various
-values appropriately. There are limitations on what characters are allowed
-in the database name. Please refer to the following MySQL documentation
-for more information: https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
 
 MySQLデータベースに接続するために、次のサンプルをFabric CA server構成ファイルに追加できます。
 さまざまな値を適切にカスタマイズしてください。
@@ -886,23 +599,12 @@ MySQLデータベースに接続するために、次のサンプルをFabric CA
 詳細については、以下のMySQLドキュメントを参照してください。
 https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
 
-On MySQL 5.7.X, certain modes affect whether the server permits '0000-00-00' as a valid date.
-It might be necessary to relax the modes that MySQL server uses. We want to allow
-the server to be able to accept zero date values.
-
 MySQL 5.7.Xでは、特定のモードについて、サーバーが「0000-00-00」を有効な日付として許可するかどうかに影響します。
 MySQLサーバーが使用するモードを緩和する必要がある場合があります。
 ですので、サーバーがゼロの日付値を受け入れることができるようにしましょう。
 
-In my.cnf, find the configuration option *sql_mode* and remove *NO_ZERO_DATE* if present.
-Restart MySQL server after making this change.
-
 my.cnfで、構成オプション *sql_mode* を見つけ、NO_ZERO_DATEが存在する場合は削除します。 
 この変更を行った後、MySQLサーバーを再起動します。
-
-Please refer to the following MySQL documentation on different modes available
-and select the appropriate settings for the specific version of MySQL that is
-being used.
 
 使用可能なさまざまなモードに関する次のMySQLドキュメントを参照し、使用されている特定のバージョンのMySQLに適切な設定を選択してください。
 
@@ -914,33 +616,13 @@ https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html
       type: mysql
       datasource: root:rootpw@tcp(localhost:3306)/fabric_ca?parseTime=true&tls=custom
 
-If connecting over TLS to the MySQL server, the ``db.tls.client``
-section is also required as described in the **PostgreSQL** section above.
-
 TLS経由でMySQLサーバーに接続する場合、上記の **PostgreSQL** セクションで説明されているように、
 ``db.tls.client`` セクションも必要です。
 
 MySQL SSL Configuration
 """"""""""""""""""""""""
 
-**Basic instructions for configuring SSL on MySQL server:**
-
 **MySQLサーバーでSSLを構成するための基本的な手順：**
-
-1. Open or create my.cnf file for the server. Add or uncomment the
-   lines below in the [mysqld] section. These should point to the key and
-   certificates for the server, and the root CA cert.
-
-   Instructions on creating server and client-side certficates:
-   http://dev.mysql.com/doc/refman/5.7/en/creating-ssl-files-using-openssl.html
-
-   [mysqld] ssl-ca=ca-cert.pem ssl-cert=server-cert.pem ssl-key=server-key.pem
-
-   Can run the following query to confirm SSL has been enabled.
-
-   mysql> SHOW GLOBAL VARIABLES LIKE 'have\_%ssl';
-
-   Should see:
 
 1. サーバーのmy.cnfファイルを開くか作成します。
    [mysqld]セクションで以下の行を追加またはコメント解除します。
@@ -965,16 +647,6 @@ MySQL SSL Configuration
    | have_ssl       | YES            |
    +----------------+----------------+
 
-2. After the server-side SSL configuration is finished, the next step is
-   to create a user who has a privilege to access the MySQL server over
-   SSL. For that, log in to the MySQL server, and type:
-
-   mysql> GRANT ALL PRIVILEGES ON *.* TO 'ssluser'@'%' IDENTIFIED BY
-   'password' REQUIRE SSL; mysql> FLUSH PRIVILEGES;
-
-   If you want to give a specific IP address from which the user will
-   access the server change the '%' to the specific IP address.
-
 2. サーバー側のSSL設定が完了したら、次のステップとして、SSL経由でMySQLサーバーにアクセスする権限を持つユーザーを作成します。
    そのためには、MySQLサーバーにログインし、次のように入力します。
 
@@ -983,40 +655,17 @@ MySQL SSL Configuration
 
    ユーザーがサーバーにアクセスする特定のIPアドレスを指定する場合は、「%」を特定のIPアドレスに変更します。
 
-**MySQL Server - Require Client Certificates**
-
 **MySQLサーバー - クライアント証明書を必要とする**
 
-Options for secure connections are similar to those used on the server side.
-
 セキュア接続のオプションは、サーバー側で使用されるオプションと似ています。
-
--  ssl-ca identifies the Certificate Authority (CA) certificate. This
-   option, if used, must specify the same certificate used by the server.
--  ssl-cert identifies MySQL server's certificate.
--  ssl-key identifies MySQL server's private key.
 
 -  ssl-ca は、認証局（CA）証明書を識別します。このオプションを使用する場合、サーバーが使用する証明書と同じ証明書を指定する必要があります。
 -  ssl-cert は、MySQLサーバーの証明書を識別します。
 -  ssl-key は、MySQLサーバーの秘密鍵を識別します。
 
-Suppose that you want to connect using an account that has no special
-encryption requirements or was created using a GRANT statement that
-includes the REQUIRE SSL option. As a recommended set of
-secure-connection options, start the MySQL server with at least
---ssl-cert and --ssl-key options. Then set the ``db.tls.certfiles`` property
-in the server configuration file and start the Fabric CA server.
-
 特別な暗号化要件のないアカウント、または REQUIRE SSL オプションを含む GRANT ステートメントを使用し、作成されたアカウントで接続するとします。
 推奨されるセキュア接続オプションのセットとして、少なくとも -ssl-cert および -ssl-key オプションを使用してMySQLサーバーを起動します。
 次に、サーバー構成ファイルで ``db.tls.certfiles`` プロパティーを設定し、Fabric CA serverを開始します。
-
-To require that a client certificate also be specified, create the
-account using the REQUIRE X509 option. Then the client must also specify
-proper client key and certificate files; otherwise, the MySQL server
-will reject the connection. To specify client key and certificate files
-for the Fabric CA server, set the ``db.tls.client.certfile``,
-and ``db.tls.client.keyfile`` configuration properties.
 
 クライアント証明書も指定するように要求するには、REQUIRE X509 オプションを使用してアカウントを作成します。
 次に、クライアントは適切なクライアントキーと証明書ファイルも指定する必要があります。 
@@ -1027,23 +676,12 @@ Fabric CA server のクライアントキーと証明書ファイルを指定す
 Configuring LDAP
 ~~~~~~~~~~~~~~~~
 
-The Fabric CA server can be configured to read from an LDAP server.
-
 Fabric CAサーバーは、LDAPサーバーから読み取るように構成できます。
-
-In particular, the Fabric CA server may connect to an LDAP server to do
-the following:
-
--  authenticate an identity prior to enrollment
--  retrieve an identity's attribute values which are used for authorization.
 
 特に、Fabric CAサーバーはLDAPサーバーに接続して次のことを実行できます。
 
 -  登録前に身元を認証する
 -  認証に使用されるIDの属性値を取得します。
-
-Modify the LDAP section of the Fabric CA server's configuration file to configure the
-server to connect to an LDAP server.
 
 Fabric CAサーバーの構成ファイルのLDAPセクションを変更して、LDAPサーバーに接続するようにサーバーを構成します。
 
@@ -1096,36 +734,6 @@ Fabric CAサーバーの構成ファイルのLDAPセクションを変更して�
 
 Where:
 
-  * ``scheme`` is one of *ldap* or *ldaps*;
-  * ``adminDN`` is the distinquished name of the admin user;
-  * ``pass`` is the password of the admin user;
-  * ``host`` is the hostname or IP address of the LDAP server;
-  * ``port`` is the optional port number, where default 389 for *ldap*
-    and 636 for *ldaps*;
-  * ``base`` is the optional root of the LDAP tree to use for searches;
-  * ``filter`` is a filter to use when searching to convert a login
-    user name to a distinguished name. For example, a value of
-    ``(uid=%s)`` searches for LDAP entries with the value of a ``uid``
-    attribute whose value is the login user name. Similarly,
-    ``(email=%s)`` may be used to login with an email address.
-  * ``LDAPAttrs`` is an array of LDAP attribute names to request from the
-    LDAP server on a user's behalf;
-  * the attribute.converters section is used to convert LDAP attributes to fabric
-    CA attributes, where
-    * ``fcaAttrName`` is the name of a fabric CA attribute;
-    * ``fcaExpr`` is an expression whose evaluated value is assigned to the fabric CA attribute.
-    For example, suppose that <LDAPAttrs> is ["uid"], <fcaAttrName> is 'hf.Revoker',
-    and <fcaExpr> is 'attr("uid") =~ "revoker*"'.  This means that an attribute
-    named "uid" is requested from the LDAP server on a user's behalf.  The user is
-    then given a value of 'true' for the 'hf.Revoker' attribute if the value of
-    the user's 'uid' LDAP attribute begins with 'revoker'; otherwise, the user
-    is given a value of 'false' for the 'hf.Revoker' attribute.
-  * the attribute.maps section is used to map LDAP response values.  The typical
-    use case is to map a distinguished name associated with an LDAP group to an
-    identity type.
-
-Where:
-
   * ``scheme`` *ldap* もしくは *ldaps*
   * ``adminDN`` adminユーザーの識別名です。
   * ``pass`` adminユーザーのパスワードです。
@@ -1147,31 +755,11 @@ Where:
     典型的な使用例は、LDAPグループに関連付けられた識別名をIDタイプにマップすることです。
 
 
-The LDAP expression language uses the govaluate package as described at
-https://github.com/Knetic/govaluate/blob/master/MANUAL.md.  This defines
-operators such as "=~" and literals such as "revoker*", which is a regular
-expression.  The LDAP-specific variables and functions which extend the
-base govaluate language are as follows:
-
 LDAP expression language は、以下で説明されているgovaluateパッケージを使用します。
 https：//github.com/Knetic/govaluate/blob/master/MANUAL.md
 これは、 "=~" などの演算子と、 "revoker*" などのリテラルを定義します。
 これは正規表現です。
 govaluate langage を拡張するLDAP固有の変数と関数は次のとおりです。
-
-  * ``DN`` is a variable equal to the user's distinguished name.
-  * ``affiliation`` is a variable equal to the user's affiliation.
-  * ``attr`` is a function which takes 1 or 2 arguments.  The 1st argument
-    is an LDAP attribute name.  The 2nd argument is a separator string which is
-    used to join multiple values into a single string; the default separator
-    string is ",". The ``attr`` function always returns a value of type
-    'string'.
-  * ``map`` is a function which takes 2 arguments.  The 1st argument
-    is any string.  The second argument is the name of a map which is used to
-    perform string substitution on the string from the 1st argument.
-  * ``if`` is a function which takes a 3 arguments where the first argument
-    must resolve to a boolean value.  If it evaluates to true, the second
-    argument is returned; otherwise, the third argument is returned.
 
   * ``DN`` ユーザーの所属に等しい変数です。
   * ``affiliation`` ユーザーの識別名に等しい変数です。
@@ -1187,18 +775,10 @@ govaluate langage を拡張するLDAP固有の変数と関数は次のとおり�
     trueと評価されると、2番目の引数が返されます。 
     それ以外の場合、3番目の引数が返されます。
 
-For example, the following expression evaluates to true if the user has
-a distinguished name ending in "O=org1,C=US", or if the user has an affiliation
-beginning with "org1.dept2." and also has the "admin" attribute of "true".
-
 たとえば、ユーザーが "O=org1,C=US" で終わる識別名を持っている場合、
 またはユーザーが "org1.dept2." で始まる所属を持ち、 "admin" 属性が "true" の場合、次の式はtrueと評価されます。
 
   **DN =~ "*O=org1,C=US" || (affiliation =~ "org1.dept2.*" && attr('admin') = 'true')**
-
-NOTE: Since the ``attr`` function always returns a value of type 'string',
-numeric operators may not be used to construct expressions.
-For example, the following is NOT a valid expression:
 
 注： ``attr`` 関数は常に「string」型の値を返すため、数値演算子を使用して式を作成することはできません。 
 たとえば、次は有効な式ではありません。
@@ -1207,18 +787,11 @@ For example, the following is NOT a valid expression:
 
      value: attr("gidNumber) >= 10000 && attr("gidNumber) < 10006
 
-Alternatively, a regular expression enclosed in quotes as shown below may be used
-to return an equivalent result:
-
 または、次のように引用符で囲まれた正規表現を使用して、同等の結果を返すこともできます。
 
 .. code:: yaml
 
      value: attr("gidNumber") =~ "1000[0-5]$" || attr("mail") == "root@example.com"
-
-The following is a sample configuration section for the default setting
-for the OpenLDAP server whose docker image is at
-``https://github.com/osixia/docker-openldap``.
 
 以下は、Dockerイメージが以下のURLにあるOpenLDAPサーバーのデフォルト設定のサンプル構成セクションです。
 ``https://github.com/osixia/docker-openldap``
@@ -1230,25 +803,9 @@ for the OpenLDAP server whose docker image is at
        url: ldap://cn=admin,dc=example,dc=org:admin@localhost:10389/dc=example,dc=org
        userfilter: (uid=%s)
 
-See ``FABRIC_CA/scripts/run-ldap-tests`` for a script which starts an
-OpenLDAP docker image, configures it, runs the LDAP tests in
-``FABRIC_CA/cli/server/ldap/ldap_test.go``, and stops the OpenLDAP
-server.
-
+``FABRIC_CA/scripts/run-ldap-tests`` を参照すると、
 OpenLDAPドッカーイメージを起動し、構成し、 ``FABRIC_CA/cli/server/ldap/ldap_test.go`` でLDAPテストを実行し、
-OpenLDAPサーバーを停止するスクリプトについては、
-``FABRIC_CA/scripts/run-ldap-tests`` を参照してください。
-
-When LDAP is configured, enrollment works as follows:
-
--  The Fabric CA client or client SDK sends an enrollment request with a
-   basic authorization header.
--  The Fabric CA server receives the enrollment request, decodes the
-   identity name and password in the authorization header, looks up the DN (Distinguished
-   Name) associated with the identity name using the "userfilter" from the
-   configuration file, and then attempts an LDAP bind with the identity's
-   password. If the LDAP bind is successful, the enrollment processing is
-   authorized and can proceed.
+OpenLDAPサーバーを停止するスクリプトについて理解できます。
 
 LDAPを構成すると、登録は次のように機能します。
 
@@ -1258,13 +815,10 @@ LDAPを構成すると、登録は次のように機能します。
    LDAPバインドが成功すると、登録処理が許可され、続行できます。
 
 
-クラスターのセットアップ（Setting up a cluster）
+Setting up a cluster
 ~~~~~~~~~~~~~~~~~~~~
 
-You may use any IP sprayer to load balance to a cluster of Fabric CA
-servers. This section provides an example of how to set up Haproxy to
-route to a Fabric CA server cluster. Be sure to change hostname and port
-to reflect the settings of your Fabric CA servers.
+クラスターのセットアップ
 
 任意のIPスプレイヤーを使用して、ファブリックCAサーバーのクラスターに負荷を分散できます。
 このセクションでは、ファブリックCAサーバークラスターにルーティングするように Haproxy をセットアップする方法の例を示します。
@@ -1293,17 +847,13 @@ haproxy.conf
           server server3 hostname3:port
 
 
-Note: If using TLS, need to use ``mode tcp``.
-
 注：TLSを使用する場合は、 ``mode tcp`` を使用する必要があります。
 
 
-複数のCAのセットアップ（Setting up multiple CAs）
+Setting up multiple CAs
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The fabric-ca server by default consists of a single default CA. However, additional CAs
-can be added to a single server by using `cafiles` or `cacount` configuration options.
-Each additional CA will have its own home directory.
+複数のCAのセットアップ
 
 デフォルトでは、fabric-ca サーバーは単一のデフォルトCAで構成されています。
 ただし、 `cafiles` または `cacount` 構成オプションを使用して、追加のCAを単一のサーバーに追加できます。
@@ -1311,10 +861,6 @@ Each additional CA will have its own home directory.
 
 cacount:
 ^^^^^^^^
-
-The `cacount` provides a quick way to start X number of default additional
-CAs. The home directory will be relative to the server directory. With this option,
-the directory structure will be as follows:
 
 `cacount` は、X個のデフォルトの追加CAをすばやく開始する方法を提供します。
 ホームディレクトリは、サーバーディレクトリに相対的です。
@@ -1326,11 +872,6 @@ the directory structure will be as follows:
       |--ca
         |--ca1
         |--ca2
-
-Each additional CA will get a default configuration file generated in it's home
-directory, within the configuration file it will contain a unique CA name.
-
-For example, the following command will start 2 default CA instances:
 
 追加の各CAは、そのホームディレクトリに生成されたデフォルトの構成ファイルを取得します。
 構成ファイル内には、一意のCA名が含まれます。
@@ -1344,31 +885,12 @@ For example, the following command will start 2 default CA instances:
 cafiles:
 ^^^^^^^^
 
-If absolute paths are not provided when using the cafiles configuration option,
-the CA home directory will be relative to the server directory.
-
 cafiles構成オプションを使用するときに絶対パスが指定されていない場合、CAホームディレクトリはサーバーディレクトリに対して相対的になります。
-
-To use this option, CA configuration files must have already been generated and
-configured for each CA that is to be started. Each configuration file must have
-a unique CA name and Common Name (CN), otherwise the server will fail to start as these
-names must be unique. The CA configuration files will override any default
-CA configuration, and any missing options in the CA configuration files will be
-replaced by the values from the default CA.
 
 このオプションを使用するには、開始するCAごとにCA構成ファイルが既に生成および構成されている必要があります。
 各構成ファイルには一意のCA名と共通名（CN）が必要です。
 そうでない場合、これらの名前は一意である必要があるため、サーバーの起動に失敗します。
 CA構成ファイルは、デフォルトのCA構成をオーバーライドし、CA構成ファイルで欠落しているオプションは、デフォルトのCAの値に置き換えられます。
-
-The precedence order will be as follows:
-
-  1. CA Configuration file
-  2. Default CA CLI flags
-  3. Default CA Environment variables
-  4. Default CA Configuration file
-
-A CA configuration file must contain at least the following:
 
 優先順位は次のとおりです。
 
@@ -1388,8 +910,6 @@ CA構成ファイルには、少なくとも次のものが含まれている必
     csr:
       cn: <COMMONNAME>
 
-You may configure your directory structure as follows:
-
 次のようにディレクトリ構造を構成できます。
 
 .. code:: yaml
@@ -1401,8 +921,6 @@ You may configure your directory structure as follows:
         |--ca2
           |-- fabric-ca-config.yaml
 
-For example, the following command will start two customized CA instances:
-
 たとえば、次のコマンドは2つのカスタマイズされたCAインスタンスを起動します。
 
 .. code:: bash
@@ -1411,16 +929,10 @@ For example, the following command will start two customized CA instances:
     --cafiles ca/ca2/fabric-ca-config.yaml
 
 
-中間CAの登録（Enrolling an intermediate CA）
+Enrolling an intermediate CA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to create a CA signing certificate for an intermediate CA, the intermediate
-CA must enroll with a parent CA in the same way that a fabric-ca-client enrolls with a CA.
-This is done by using the -u option to specify the URL of the parent CA and the enrollment ID
-and secret as shown below.  The identity associated with this enrollment ID must have an
-attribute with a name of "hf.IntermediateCA" and a value of "true".  The CN (or Common Name)
-of the issued certificate will be set to the enrollment ID. An error will occur if an intermediate
-CA tries to explicitly specify a CN value.
+中間CAの登録
 
 中間CAのCA署名証明書を作成するには、fabric-ca-clientがCAに登録するのと同じ方法で、中間CAが親CAに登録する必要があります。
 これは、以下に示すように、-u オプションを使用して、親CAのURLと登録IDおよびシークレットを指定することにより行われます。
@@ -1430,8 +942,6 @@ CA tries to explicitly specify a CN value.
 .. code:: bash
 
     fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
-
-For other intermediate CA flags see `Fabric CA server's configuration file format`_ section.
 
 他の中間CAフラグについては、`Fabric CA server's configuration file format`_ をご覧ください。
 
