@@ -1717,17 +1717,26 @@ IDを`Team1` affiliation で登録するには、以下に示すように、 `--
 Enrolling a peer identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+ピアIDの登録
+
 Now that you have successfully registered a peer identity, you may now
 enroll the peer given the enrollment ID and secret (i.e. the *password*
 from the previous section).  This is similar to enrolling the bootstrap identity
 except that we also demonstrate how to use the "-M" option to populate the
 Hyperledger Fabric MSP (Membership Service Provider) directory structure.
 
+ピアIDが正常に登録されたので、登録IDとシークレット（つまり、前のセクションのパスワード）を指定してピアを登録できます。 
+これは、ブートストラップIDの登録に似ていますが、「-M」オプションを使用してHyperledger Fabric MSP（Membership Service Provider）のディレクトリ構造を設定する方法も示します。
+
 The following command enrolls peer1.
 Be sure to replace the value of the "-M" option with the path to your
 peer's MSP directory which is the
 'mspConfigPath' setting in the peer's core.yaml file.
 You may also set the FABRIC_CA_CLIENT_HOME to the home directory of your peer.
+
+次のコマンドは、 peer1 を登録します。
+「-M」オプションの値を、ピアの core.yaml ファイルの「mspConfigPath」設定の内容を、ピアのMSPディレクトリへのパスに置き換えてください。
+FABRIC_CA_CLIENT_HOME をピアのホームディレクトリに設定することもできます。
 
 .. code:: bash
 
@@ -1737,15 +1746,26 @@ You may also set the FABRIC_CA_CLIENT_HOME to the home directory of your peer.
 Enrolling an orderer is the same, except the path to the MSP directory is
 the 'LocalMSPDir' setting in your orderer's orderer.yaml file.
 
+Orderer の登録も同様です。
+MSPディレクトリへのパスが、Orderer の orderer.yaml ファイルの「LocalMSPDir」設定であることに注意してください。
+
 All enrollment certificates issued by the fabric-ca-server have organizational
 units (or "OUs" for short) as follows:
+
+fabric-ca-server によって発行されたすべての登録証明書には、次のような組織単位（Organization Unit 略して「OU」）があります。
 
 1. The root of the OU hierarchy equals the identity type
 2. An OU is added for each component of the identity's affiliation
 
+1. OU階層のルートは、ID種別と等しい
+2. ID の affiliation の各コンポーネントに、OUが追加されます
+
 For example, if an identity is of type `peer` and its affiliation is
 `department1.team1`, the identity's OU hierarchy (from leaf to root) is
 `OU=team1, OU=department1, OU=peer`.
+
+たとえば、IDのタイプが「peer」で、所属が `department1.team1` の場合、
+IDのOU階層（枝葉からルートまで）は `OU=team1, OU=department1, OU=peer` です。
 
 Getting Identity Mixer credential
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
