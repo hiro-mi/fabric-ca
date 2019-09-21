@@ -1323,7 +1323,11 @@ For a look at the different metrics that are generated, check out
 Fabric CA Client
 ----------------
 
+Fabric CA クライアント
+
 This section describes how to use the fabric-ca-client command.
+
+このセクションでは、fabric-ca-clientコマンドの使用方法について説明します。
 
 The Fabric CA client's home directory is determined as follows:
   - if the --home command line option is set, use its value
@@ -1335,15 +1339,30 @@ The Fabric CA client's home directory is determined as follows:
     its value
   - otherwise, use ``$HOME/.fabric-ca-client``
 
+Fabric CAクライアントのホームディレクトリは、次のように決定されます。
+  - –-home コマンドラインオプションが設定されている場合は、その値を使用します
+  - それ以外の場合、 ``FABRIC_CA_CLIENT_HOME`` 環境変数が設定されている場合は、その値を使用します
+  - それ以外の場合、 ``FABRIC_CA_HOME`` 環境変数が設定されている場合は、その値を使用します
+  - それ以外の場合、 ``CA_CFG_PATH`` 環境変数が設定されている場合は、その値を使用します
+  - それ以外の場合は、 ``$HOME/.fabric-ca-client`` を使用します
+
 The instructions below assume that the client configuration file exists
 in the client's home directory.
+
+以下の手順では、クライアント構成ファイルがクライアントのホームディレクトリに存在することを前提としています。
 
 Enrolling the bootstrap identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+ブートストラップIDの登録
+
 First, if needed, customize the CSR (Certificate Signing Request) section
 in the client configuration file. Note that ``csr.cn`` field must be set
 to the ID of the bootstrap identity. Default CSR values are shown below:
+
+最初に、必要に応じて、クライアント構成ファイルの証明書署名要求（CSR : Certificate Signing Request）セクションをカスタマイズします。
+``csr.cn`` フィールドは、ブートストラップIDとして設定する必要があることに注意してください。 
+デフォルトのCSR値は次のとおりです。
 
 .. code:: yaml
 
@@ -1367,9 +1386,15 @@ to the ID of the bootstrap identity. Default CSR values are shown below:
 
 See `CSR fields <#csr-fields>`__ for description of the fields.
 
+フィールドの説明については、 `CSRフィールド<#csr-fields>`__ を参照してください。
+
 Then run ``fabric-ca-client enroll`` command to enroll the identity. For example,
 following command enrolls an identity whose ID is **admin** and password is **adminpw**
 by calling Fabric CA server that is running locally at 7054 port.
+
+次に、 ``fabric-ca-client enroll`` コマンドを実行してIDを登録します。 
+たとえば、次のコマンドは、7054ポートでローカルに実行されているFabric CAサーバーを呼び出すことにより、
+IDが **admin** でパスワードが **adminpw** のIDを登録します。
 
 .. code:: bash
 
@@ -1380,15 +1405,25 @@ The enroll command stores an enrollment certificate (ECert), corresponding priva
 certificate chain PEM files in the subdirectories of the Fabric CA client's ``msp`` directory.
 You will see messages indicating where the PEM files are stored.
 
+enrollコマンドは、登録証明書（ECert）、対応する秘密鍵、およびCA証明書チェーンPEMファイルを
+Fabric CAクライアントの ``msp`` ディレクトリのサブディレクトリに保存します。 
+PEMファイルの保存場所を示すメッセージが表示されます。
+
 Registering a new identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+新しいIDを登録する
 
 The identity performing the register request must be currently enrolled, and
 must also have the proper authority to register the type of the identity that is being
 registered.
 
+登録要求を実行するIDは現在登録されている必要があり、登録するIDのタイプに対する適切な権限も持っている必要があります。
+
 In particular, three authorization checks are made by the Fabric CA server
 during registration as follows:
+
+特に、登録中にFabric CAサーバーによって3つの認証チェックが行われます。
 
 1. The registrar (i.e. the invoker) must have the "hf.Registrar.Roles" attribute with a
    comma-separated list of values where one of the values equals the type of
@@ -1430,6 +1465,35 @@ during registration as follows:
      value is 'a.b.c, x.y.z', it is valid because 'a.b.c' matches 'a.b.*' and 'x.y.z'
      matches the registrar's 'x.y.z' value.
 
+1. レジストラ（つまり、呼び出し側）は、値の1つが登録されているIDのタイプと等しい値のコンマ区切りリストを持つ
+   "hf.Registrar.Roles" 属性を持っている必要があります。 
+   たとえば、レジストラに値 "peer" の "hf.Registrar.Roles" 属性がある場合、レジストラはタイプ "peer" のIDを登録できますが、
+   クライアント、管理者、またはOrdererは登録できません。
+
+2. レジストラの affiliation は、登録されているIDの affiliation と同じか、その接頭辞でなければなりません。
+   たとえば、 "a.b" の affiliation を持つレジストラは、 "a.b.c" の affiliation を持つIDを登録できますが、
+   "a.c" の affiliation を持つアイデンティティは登録できません。
+   IDに root affiliation が必要な場合、affiliation リクエストはドット（"."）である必要があり、
+   レジストラも root affiliation を持っている必要があります。
+   登録要求に affiliation が指定されていない場合、登録されるIDにはレジストラの affiliation が付与されます。
+   
+3. レジストラは、次のすべての条件が満たされている場合、IDと属性を登録できます。
+   - レジストラは、条件を満たせば、プレフィックス 'hf.' を持つFabric CA予約属性を登録できます。
+     これは、レジストラが属性を所有し、それが 'hf.Registrar.Attributes' 属性の値の一部である場合に限ります。
+     さらに、属性がリスト型の場合、登録される属性の値は、レジストラが持っている値と等しいか、値のサブセットである必要があります。
+     属性がブール型の場合、レジストラは、属性の値が 'true' である場合にのみ、属性を登録できます。
+   - カスタム属性（名前が 'hf.' で始まらない属性）を登録するには、登録する属性またはパターンの値が登録されている
+     'hf.Registar.Attributes' 属性がレジストラに必要です。 
+     サポートされている唯一のパターンは、末尾に '*' が付いた文字列です。
+     たとえば、'a.b.*' は、 'a.b.' で始まるすべての属性名に一致するパターンです。 
+     たとえば、レジストラに hf.Registrar.Attributes=orgAdmin がある場合、
+     レジストラがIDに対して追加または削除できる唯一の属性は 'orgAdmin' 属性です。
+   - 要求された属性名が 'hf.Registrar.Attributes' の場合、この属性の要求された値が 'hf.Registrar.Attributes' の
+     レジストラの値と等しいかサブセットであるかどうかを確認するため、追加のチェックが実行されます。 
+     これが真であるためには、リクエストされた各値が 'hf.Registrar.Attributes' 属性のレジストラの値と一致する必要があります。 
+     たとえば、 'hf.Registrar.Attributes' のレジストラの値が 'a.b.*, x.y.z' であり、要求された属性値が 'a.b.c, x.y.z' である場合、
+      'a.b.c' は 'a.b.*' と一致し、 'x.y.z' は、レジストラの 'x.y.z' 値と一致します。
+     
 Examples:
    Valid Scenarios:
       1. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
@@ -1444,29 +1508,40 @@ Examples:
          the requested attribute value is 'peer', 'peer,client,admin,orderer', or 'client,admin',
          it is valid because the requested value is equal to or a subset of the registrar's value.
 
-   Invalid Scenarios:
-      1. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'hf.Registar.Attributes = a.b.c, x.y.*', it is invalid
-         because requested attribute 'x.y.*' is not a pattern owned by the registrar. The value
-         'x.y.*' is a superset of 'x.y.z'.
-      2. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'hf.Registar.Attributes = a.b.c, x.y.z, attr1', it is invalid
-         because the registrar's 'hf.Registrar.Attributes' attribute values do not contain 'attr1'.
-      3. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'a.b', it is invalid because the value 'a.b' is not contained in
-         'a.b.*'.
-      4. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'x.y', it is invalid because 'x.y' is not contained by 'x.y.z'.
-      5. If the registrar has the attribute 'hf.Registrar.Roles = peer' and
-         the requested attribute value is 'peer,client', it is invalid because
-         the registrar does not have the client role in its value of hf.Registrar.Roles
-         attribute.
-      6. If the registrar has the attribute 'hf.Revoker = false' and the requested attribute
-         value is 'true', it is invalid because the hf.Revoker attribute is a boolean attribute
-         and the registrar's value for the attribute is not 'true'.
+例:
+   有効なシナリオ:
+      1. レジストラが属性 'hf.Registrar.Attributes = a.b.*, x.y.z' を持ち、属性 'a.b.c' を登録しようとしている場合、
+         'a.b.c' は 'a.b.*' と一致するため有効です。
+      2. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、属性 'x.y.z' を登録しようとしている場合、
+         'x.y.z' はレジストラの 'x.y.z' と一致するため有効です。
+      3. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、要求された属性値が 'a.b.c, x.y.z' の場合、
+         'a.b.*' はレジストラの 'a.b.c' 、 'x.y.z' はレジストラの 'x.y.z' と一致するため有効です。
+      4. レジストラに属性  'hf.Registrar.Roles = peer,client,admin,orderer' があり、
+         要求された属性値が 'peer' 、 'peer,client,admin,orderer' または 'client,admin'である場合、 
+         要求された値は、レジストラの値と等しいか、レジストラの値のサブセットであるため、有効です。
+
+   無効なシナリオ:
+      1. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、
+         属性「hf.Registar.Attributes = abc、xy *」を登録しようとしている場合、
+         要求された属性 'x.y.*' はレジストラが所有しているパターンではないため無効です。
+         値 'x.y.*' は 'x.y.z' の上位集合です。
+      2. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、
+         属性 'hf.Registar.Attributes = a.b.c, x.y.z, attr1' を登録しようとしている場合、
+         レジストラの 'hf.Registrar.Attributes' の属性には 'attr1' が含まれないため無効です。
+      3. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、
+         属性「a.b」を登録しようとしている場合、 'a.b' は 'a.b.*' に含まれていないため無効です。
+      4. レジストラに属性 'hf.Registrar.Attributes = a.b.*, x.y.z' があり、
+         属性 'x.y' を登録しようとしている場合、 'x.y' は 'x.y' に含まれていないため無効です。
+      5. レジストラに属性 'hf.Registrar.Roles = peer' があり、要求された属性値が 'peer,client' である場合、
+         レジストラには hf.Registrar.Roles 属性の値にclientロールがないため無効です。
+      6. レジストラに属性 'hf.Revoker = false' があり、要求された属性値が 'true' の場合、
+         hf.Revoker 属性はブール属性であり、属性のレジストラの値は 'true' ではないため無効です。
 
 The table below lists all the attributes that can be registered for an identity.
 The names of attributes are case sensitive.
+
+次の表に、IDに登録できるすべての属性を示します。 
+属性の名前では大文字と小文字が区別されます。
 
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
 | Name                        | Type       | Description                                                                                                |
@@ -1490,12 +1565,23 @@ Note: When registering an identity, you specify an array of attribute names and 
 specifies multiple array elements with the same name, only the last element is currently used. In other words,
 multi-valued attributes are not currently supported.
 
+注：IDを登録するときは、属性の名前と値の配列を指定します。 
+配列が同じ名前の複数の配列要素を指定する場合、最後の要素のみが現在使用されています。 
+つまり、複数の値を持つ属性は現在サポートされていません。
+
 The following command uses the **admin** identity's credentials to register a new
 identity with an enrollment id of "admin2", an affiliation of
 "org1.department1", an attribute named "hf.Revoker" with a value of "true", and
 an attribute named "admin" with a value of "true".  The ":ecert" suffix means that
 by default the "admin" attribute and its value will be inserted into the identity's
 enrollment certificate, which can then be used to make access control decisions.
+
+次のコマンドは、 **管理者ID** の資格情報を使用して、
+「admin2」というIDを新規登録します。
+属性情報としては、所属は「org1.department1」、「hf.Revoker」属性の値が「true」、「admin」属性の値が「true」です。 
+「:ecert」サフィックスは、デフォルトで「admin」属性のデフォルト値を意味します。
+その値はIDの登録証明書に挿入され、アクセス制御の決定に使用できます。
+
 
 .. code:: bash
 
@@ -1507,15 +1593,26 @@ This password is required to enroll the identity.
 This allows an administrator to register an identity and give the
 enrollment ID and the secret to someone else to enroll the identity.
 
+登録シークレットとも呼ばれるパスワードが表示されます。 
+このパスワードは、IDを登録するために必要です。 
+これにより、管理者はIDを登録し、IDを登録するための登録IDと秘密鍵を他の誰かに渡すことができます。
+
 Multiple attributes can be specified as part of the --id.attrs flag, each
 attribute must be comma separated. For an attribute value that contains a comma,
 the attribute must be encapsulated in double quotes. See example below.
+
+複数の属性を --id.attrs フラグの一部として指定できます。  
+各属性はコンマで区切る必要があります。 
+コンマを含む属性値の場合、属性はダブルクオーテーションで囲う必要があります。 
+以下の例を参照してください。
 
 .. code:: bash
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,client",hf.Revoker=true'
 
 or
+
+または
 
 .. code:: bash
 
@@ -1524,6 +1621,9 @@ or
 You may set default values for any of the fields used in the register command
 by editing the client's configuration file.  For example, suppose the configuration
 file contains the following:
+
+クライアントの構成ファイルを編集することにより、registerコマンドで使用される任意のフィールドにデフォルト値を設定できます。 
+たとえば、以下のような構成ファイルだったとします。  
 
 .. code:: yaml
 
@@ -1543,6 +1643,10 @@ The following command would then register a new identity with an enrollment id o
 configuration file including the identity type: "client", affiliation: "org1.department1",
 and two attributes: "hf.Revoker" and "anotherAttrName".
 
+次のコマンドは、コマンドラインから取得する「admin3」の登録IDで新しいIDを登録し、
+残りは構成ファイルから取得されます
+ID種別：「client」、所属：「org1.department1」 、および2つの属性：「hf.Revoker」および「anotherAttrName」。
+
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
@@ -1551,15 +1655,26 @@ and two attributes: "hf.Revoker" and "anotherAttrName".
 To register an identity with multiple attributes requires specifying all attribute names and values
 in the configuration file as shown above.
 
+複数の属性を持つIDを登録するには、上記のように構成ファイルにすべての属性名と値を指定する必要があります。
+
 Setting `maxenrollments` to 0 or leaving it out from the configuration will result in the identity
 being registered to use the CA's max enrollment value. Furthermore, the max enrollment value for
 an identity being registered cannot exceed the CA's max enrollment value. For example, if the CA's
 max enrollment value is 5. Any new identity must have a value less than or equal to 5, and also
 can't set it to -1 (infinite enrollments).
 
+`maxenrollments` を 0 に設定するか、構成から除外すると、CAの最大登録数を使用するようにIDが登録されます。 
+さらに、登録されるIDの最大登録数は、CAの最大登録数を超えることはできません。 
+たとえば、CAの最大登録値が 5 の場合、新しいIDの値は 5 以下である必要があります。
+また、この値は -1 （無制限）に設定することはできません。
+
 Next, let's register a peer identity which will be used to enroll the peer in the following section.
 The following command registers the **peer1** identity.  Note that we choose to specify our own
 password (or secret) rather than letting the server generate one for us.
+
+次のセクションではピアの登録に使用されるピアIDを登録しましょう。 
+次のコマンドは、**peer1** IDを登録します。 
+サーバーにパスワードを生成させるのではなく、独自のパスワード（または秘密鍵）を指定することに注意してください。
 
 .. code:: bash
 
@@ -1569,6 +1684,10 @@ password (or secret) rather than letting the server generate one for us.
 Note that affiliations are case sensitive except for the non-leaf affiliations that are specified in
 the server configuration file, which are always stored in lower case. For example, if the affiliations
 section of the server configuration file looks like this:
+
+サーバー構成ファイルで指定されているleaf以外のaffliationでは、affiliationは大文字と小文字が区別されることに注意してください。
+leaf affiliationは常に小文字で保存されます。 
+たとえば、サーバー構成ファイルの所属セクションが次のようになっている場合：
 
 .. code:: bash
 
@@ -1584,6 +1703,11 @@ section of the server configuration file looks like this:
 Viper treats map keys as case insensitive and always returns lowercase value. To register an identity with
 `Team1` affiliation, `bu1.department1.Team1` would need to be specified to the
 `--id.affiliation` flag as shown below:
+
+`BU1`, `Department1`, `BU2` は小文字で保存されます。 これは、Fabric CAが
+Viper（訳者注：Golangの設定ファイル導入支援ライブラリ）を使用して構成を読み取るためです。
+Viperはマップキーを大文字と小文字を区別せずに扱い、常に小文字の値を返します。 
+IDを`Team1` affiliation で登録するには、以下に示すように、 `--id.affiliation` フラグで、`bu1.department1.Team1` を指定する必要があります。
 
 .. code:: bash
 
