@@ -1769,37 +1769,74 @@ IDのOU階層（枝葉からルートまで）は `OU=team1, OU=department1, OU=
 
 Getting Identity Mixer credential
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Identity Mixer資格情報の取得
+
 Identity Mixer (Idemix) is a cryptographic protocol suite for privacy-preserving authentication and transfer of certified attributes.
 Idemix allows clients to authenticate with verifiers without the involvement of the issuer (CA) and selectively disclose only those attributes
 that are required by the verifier and can do so without being linkable across their transactions.
 
+Identity Mixer（Idemix）は、プライバシーを保護する認証および認証された属性の転送のための暗号化プロトコルスイートです。
+Idemixを使用すると、クライアントは発行者（CA）の関与なしに検証者で認証でき、検証者が必要とする属性のみを選択的に開示できます。
+
 Fabric CA server can issue Idemix credentials in addition to X509 certificates. An Idemix credential can be requested by sending the request to
 the ``/api/v1/idemix/credential`` API endpoint. For more information on this and other Fabric CA server API endpoints, please refer to
 `swagger-fabric-ca.json <https://github.com/hyperledger/fabric-ca/blob/master/swagger/swagger-fabric-ca.json>`_.
+
+ファブリックCAサーバーは、X509証明書に加えてIdemix資格情報を発行できます。 Idemix認証情報は、 ``/api/v1/idemix/credential`` APIエンドポイントに要求を送信することで要求できます。
+これおよび他のFabric CAサーバーAPIエンドポイントの詳細については、`swagger-fabric-ca.json <https://github.com/hyperledger/fabric-ca/blob/master/swagger/swagger-fabric-ca.json>`_ を参照してください。
 
 The Idemix credential issuance is a two step process. First, send a request with an empty body to the ``/api/v1/idemix/credential``
 API endpoint to get a nonce and CA's Idemix public key. Second, create a credential request using the nonce and CA's Idemix public key and
 send another request with the credential request in the body to  the ``/api/v1/idemix/credential`` API endpoint to get an Idemix credential,
 Credential Revocation Information (CRI), and attribute names and values. Currently, only three attributes are supported:
 
+Idemixクレデンシャルの発行は2段階のプロセスです。 
+最初に、空のボディを含むリクエストを ``/api/v1/idemix/credential`` APIエンドポイントに送信して、ナンスとCAのIdemix公開キーを取得します。 
+次に、nonceとCAのIdemix公開鍵を使用して認証情報要求を作成し、認証情報要求を本文に含む別の要求を ``/api/v1/idemix/credential`` APIエンドポイントに送信します。
+それにより、Idemix認証情報、認証情報失効情報（CRI:Credential Revocation Information）、 および属性の名前と値を得ます。 
+現在、次の3つの属性のみがサポートされています。
+
 - **OU** - organization unit of the identity. The value of this attribute is set to identity's affiliation. For example, if identity's affiliation is `dept1.unit1`, then OU attribute is set to `dept1.unit1`
 - **IsAdmin** - if the identity is an admin or not. The value of this attribute is set to the value of `isAdmin` registration attribute.
 - **EnrollmentID** - enrollment ID of the identity
 
+- **OU** - IDの組織単位（Organization Unit）。 この属性の値は、IDの所属に設定されます。 たとえば、IDの所属が `dept1.unit1` の場合、OU属性は  `dept1.unit1` に設定されます。
+- **IsAdmin** - IDが管理者であるかどうか。 この属性の値は、isAdmin 登録属性の値に設定されます。
+- **EnrollmentID** - IDの登録ID。
+
 You can refer to the `handleIdemixEnroll` function in https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go for reference implementation
 of the two step process for getting Idemix credential.
 
+Idemixクレデンシャルを取得するための2ステッププロセスのリファレンス実装については、
+https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go の `handleIdemixEnroll` 関数を参照できます。
+
 The ``/api/v1/idemix/credential`` API endpoint accepts both basic and token authorization headers. The basic authorization header should
 contain User's registration ID and password. If the identity already has X509 enrollment certificate, it can also be used to create a token authorization header.
+
+``/api/v1/idemix/credential`` APIエンドポイントは、basic認証ヘッダーとトークン認証ヘッダーの両方を受け入れます。 
+basic認証ヘッダーには、ユーザーの登録IDとパスワードが含まれている必要があります。
+IDにすでにX509登録証明書がある場合、トークン認証ヘッダーの作成にも使用できます。
 
 Note that Hyperledger Fabric will support clients to sign transactions with both X509 and Idemix credentials, but will only support X509 credentials
 for peer and orderer identities. As before, applications can use a Fabric SDK to send requests to the Fabric CA server. SDKs hide the complexity
 associated with creating authorization header and request payload, and with processing the response.
 
+Hyperledger Fabricは、X509 と Idemix の両方の資格情報を使用してトランザクションに署名するクライアントをサポートしますが、Peer ID と Oederer ID の X509 資格情報のみをサポートすることに注意してください。
+前と同様に、アプリケーションは Fabric SDK を使用して、Fabric CA サーバーにリクエストを送信できます。 
+SDK は、認証ヘッダーとリクエストペイロードの作成、および応答の処理に関連する複雑さを隠します
+
 Getting Idemix CRI (Certificate Revocation Information)
 -------------------------------------------------------
+
+Idemix CRI（証明書失効情報）の取得
+
 An Idemix CRI (Credential Revocation Information) is similar in purpose to an X509 CRL (Certificate Revocation List):
 to revoke what was previously issued.  However, there are some differences.
+
+Idemix CRI（Credential Revocation Information : 資格情報失効情報）は、
+目的が X509 CRL（Credential Revocation List : 証明書失効リスト）と似ており、以前に発行されたものを失効させます。 
+ただし、いくつかの違いがあります。
 
 In X509, the issuer revokes an end user's certificate and its ID is included in the CRL.
 The verifier checks to see if the user's certificate is in the CRL and if so, returns an authorization failure.
