@@ -951,29 +951,14 @@ Upgrading the server
 
 サーバーのアップグレード
 
-The Fabric CA server must be upgraded before upgrading the Fabric CA client.
-Prior to upgrade, it is suggested that the current database be backed up:
-
 Fabric CAクライアントをアップグレードする前に、Fabric CAサーバーをアップグレードする必要があります。 
 アップグレードの前に、現在のデータベースをバックアップすることをお勧めします。
-
-- If using sqlite3, backup the current database file (which is named fabric-ca-server.db by default).
-- For other database types, use the appropriate backup/replication mechanism.
 
 - sqlite3を使用している場合、現在のデータベースファイル（デフォルトではfabric-ca-server.dbという名前）をバックアップします。
 - 他のデータベースタイプの場合は、適切なバックアップ/レプリケーションメカニズムを使用します。
 
-To upgrade a single instance of Fabric CA server:
-
 Fabric CAサーバーの単一インスタンスをアップグレードするには：
 
-1. Stop the fabric-ca-server process.
-2. Ensure the current database is backed up.
-3. Replace previous fabric-ca-server binary with the upgraded version.
-4. Launch the fabric-ca-server process.
-5. Verify the fabric-ca-server process is available with the following
-   command where <host> is the hostname on which the server was started::
-   
 1. fabric-ca-server プロセスを停止します。
 2. 現在のデータベースがバックアップされていることを確認します。
 3. 以前の fabric-ca-server バイナリをアップグレードされたバージョンに置き換えます。
@@ -987,13 +972,9 @@ Upgrading a cluster:
 
 クラスターのアップグレード：
 
-To upgrade a cluster of fabric-ca-server instances using either a MySQL or Postgres database, perform the following procedure. We assume that you are using haproxy to load balance to two fabric-ca-server cluster members on host1 and host2, respectively, both listening on port 7054. After this procedure, you will be load balancing to upgraded fabric-ca-server cluster members on host3 and host4 respectively, both listening on port 7054.
-
 MySQL または Postgres データベースを使用して fabric-ca-server インスタンスのクラスターをアップグレードするには、次の手順を実行します。
 haproxyを使用して、それぞれ host1 と host2 の2つの fabric-ca-server クラスターメンバーに負荷分散し、両方ともポート7054でリッスンしていると仮定します。
 この手順の後、両方ともポート7054でリッスンしている host3 と host4 のアップグレードされた fabric-ca-server クラスターメンバーの負荷分散を行います。
-
-In order to monitor the changes using haproxy stats, enable statistics collection. Add the following lines to the global section of the haproxy configuration file:
 
 haproxy統計を使用して変更を監視するには、統計収集を有効にします。 
 haproxy設定ファイルのグローバルセクションに次の行を追加します。
@@ -1003,13 +984,9 @@ haproxy設定ファイルのグローバルセクションに次の行を追加�
     stats socket /var/run/haproxy.sock mode 666 level operator
     stats timeout 2m
 
-Restart haproxy to pick up the changes::
-
 haproxyを再起動して、変更を有効にします。
 
     # haproxy -f <configfile> -st $(pgrep haproxy)
-
-To display summary information from the haproxy "show stat" command, the following function may prove useful for parsing the copious amount of CSV data returned:
 
 haproxy "show stat"コマンドからの要約情報を表示するには、次の関数から返された大量のCSVデータが解析に役立つことがあります。
 
@@ -1024,14 +1001,10 @@ haproxy "show stat"コマンドからの要約情報を表示するには、次�
     }
 
 
-1) Initially your haproxy configuration file is similar to the following::
-
 1) 最初に、haproxy設定ファイルは次のようになります。
 
       server server1 host1:7054 check
       server server2 host2:7054 check
-
-   Change this configuration to the following::
    
    この構成を次のように変更します。
 
@@ -1039,8 +1012,6 @@ haproxy "show stat"コマンドからの要約情報を表示するには、次�
       server server2 host2:7054 check backup
       server server3 host3:7054 check
       server server4 host4:7054 check
-
-2) Restart the HA proxy with the new configuration as follows::
 
 2) 次のように、新しい構成でHAプロキシを再起動します。
 
@@ -1056,17 +1027,6 @@ haproxy "show stat"コマンドからの要約情報を表示するには、次�
         3   fabric-cas  server1     UP     1    0    1
         4   fabric-cas  server2     UP     1    0    1
 
-3) Install upgraded binaries of fabric-ca-server on host3 and host4. The new
-   upgraded servers on host3 and host4 should be configured to use the same
-   database as their older counterparts on host1 and host2. After starting
-   the upgraded servers, the database will be automatically migrated. The
-   haproxy will forward all new traffic to the upgraded servers, since they
-   are not configured as backup servers. Verify using the ``"fabric-ca-client getcainfo"``
-   command that your cluster is still functioning appropriately before proceeding.
-   Also, ``"haProxyShowStats"`` should now reflect that all servers are active,
-   similar to the following::
-   
-
 3) host3およびhost4にfabric-ca-serverのアップグレードされたバイナリをインストールします。 
    host3およびhost4の新しいアップグレードされたサーバーは、host1およびhost2の古い対応サーバーと同じデータベースを使用するように構成する必要があります。 
    アップグレードされたサーバーを起動すると、データベースは自動的に移行されます。 
@@ -1080,12 +1040,6 @@ haproxy "show stat"コマンドからの要約情報を表示するには、次�
         3   fabric-cas  server1    UP     1    0    1
         4   fabric-cas  server2    UP     1    0    1
 
-4) Stop the old servers on host1 and host2. Verify using the
-   ``"fabric-ca-client getcainfo"`` command that your new cluster is still
-   functioning appropriately before proceeding. Then remove the older
-   server backup configuration from the haproxy configuration file,
-   so that it looks similar to the following::
-
 4) host1およびhost2の古いサーバーを停止します。
    先に進む前に、 ``"fabric-ca-client getcainfo"`` コマンドを使用して、新しいクラスターが適切に機能していることを確認してください。
    次に、古いサーバーバックアップ構成をhaproxy構成ファイルから削除します。これにより、次のようになります。
@@ -1093,15 +1047,10 @@ haproxy "show stat"コマンドからの要約情報を表示するには、次�
       server server3 host3:7054 check
       server server4 host4:7054 check
 
-5) Restart the HA proxy with the new configuration as follows::
-
 5) 次のように、新しい構成でHAプロキシを再起動します。
 
       haproxy -f <configfile> -st $(pgrep haproxy)
 
-   ``"haProxyShowStats"`` will now reflect the modified configuration,
-   with two active servers which have been upgraded to the new version::
-   
    ``"haProxyShowStats"`` は変更された構成を反映し、新しいバージョンにアップグレードされた2つのアクティブなサーバーを確認できます。
 
       sid   pxname      svname  status  weig  act  bck
@@ -1117,16 +1066,9 @@ Operations Service
 
 運用サービス
 
-The CA Server hosts an HTTP server that offers a RESTful “operations” API. This API
-is intended to be used by operators, not administrators or “users” of the network.
-
 CA Serverは、RESTfulな「操作」APIを提供するHTTPサーバーをホストします。 
 このAPIは、ネットワークの管理者や「ユーザー」ではなく、運用担当者が使用することを目的としています。
 
-The API exposes the following capabilities:
-
-    Prometheus target for operational metrics (when configured)
-    
 APIは次の機能を公開します。
 
     運用メトリックスにおけるPrometheusのターゲット（構成されている場合）
@@ -1137,21 +1079,12 @@ Configuring the Operations Service
 
 運用サービスの構成
 
-The operations service requires two basic pieces of configuration:
-
-    The **address** and **port** to listen on.
-    The **TLS certificates** and **keys** to use for authentication and encryption. Note, **these
-    certificates should be generated by a separate and dedicated CA**. Do not use a CA that
-    has generated certificates for any organizations in any channels.
-
 運用サービスには、2つの基本的な構成が必要です。
 
     リッスンする **アドレス** と **ポート** 。
     認証と暗号化に使用する **TLS証明書** と **鍵** 。
     **注意：これらの証明書は、個別の専用CAによって生成される必要がある。**
     どのチャネルのどの組織にも、証明書を生成したCAを使用しないでください。
-
-The CA server can be configurated in the ``operations`` section of server's configuration file:
 
 CAサーバーは、サーバーの構成ファイルの ``operations`` セクションで構成できます。
 
@@ -1181,18 +1114,8 @@ CAサーバーは、サーバーの構成ファイルの ``operations`` セク�
       clientRootCAs:
         files: []
 
-The ``listenAddress`` key defines the host and port that the operation server
-will listen on. If the server should listen on all addresses, the host portion
-can be omitted.
-
 ``listenAddress`` キーは、オペレーションサーバーがリッスンするホストとポートを定義します。
 サーバーがすべてのアドレスをリッスンする必要がある場合、ホスト部分は省略できます。
-
-The ``tls`` section is used to indicate whether or not TLS is enabled for the
-operations service, the location of the service's certificate and private key,
-and the locations of certificate authority root certificates that should be
-trusted for client authentication. When ``clientAuthRequired`` is ``true``,
-clients will be required to provide a certificate for authentication.
 
 ``tls`` セクションは、運用サービスでTLSが有効になっているかどうか、サービスの証明書と秘密鍵の場所、
 およびクライアント認証で信頼される認証局ルート証明書の場所を示すために使用されます。
@@ -1203,23 +1126,10 @@ Operations Security
 
 運用セキュリティ
 
-As the operations service is focused on operations and intentionally unrelated
-to the Fabric network, it does not use the Membership Services Provider for
-access control. Instead, the operations service relies entirely on mutual TLS with
-client certificate authentication.
-
 運用サービスは運用に焦点を合わせており、意図的にFabricネットワークとは無関係であるため、アクセス制御にMembership Services Providerを使用しません。
 代わりに、オペレーションサービスは、クライアント証明書による認証を使用した、Mutal TLSに完全に依存しています。
 
 （訳者注：接続先のサーバーが信頼できることを保証するためにHTTPSを使い、接続してくるクライアントが信頼できることを保証するためTLSクライアント認証がある。これを同時に行うことをMutual TLS(SSL)と呼びます。）
-
-It is highly recommended to enable mutual TLS by setting the value of ``clientAuthRequired``
-to ``true`` in production environments. With this configuration, clients are
-required to provide a valid certificate for authentication. If the client does
-not provide a certificate or the service cannot verify the client’s certificate,
-the request is rejected. Note that if ``clientAuthRequired`` is set to ``false``,
-clients do not need to provide a certificate; if they do, however, and the service
-cannot verify the certificate, then the request will be rejected.
 
 実稼働環境で ``clientAuthRequired`` の値を ``true`` に設定して、Mutal TLSを有効にすることを強くお勧めします。
 この構成では、クライアントは認証に有効な証明書を提供する必要があります。
@@ -1227,19 +1137,12 @@ cannot verify the certificate, then the request will be rejected.
  ``clientAuthRequired`` が ``false`` に設定されている場合、クライアントは証明書を提供する必要がないことに注意してください。 
  ただし、証明書が提供され、サービスが検証できない場合、要求は拒否されます。
 
-When TLS is disabled, authorization is bypassed and any client that can
-connect to the operations endpoint will be able to use the API.
-
 TLSが無効になっている場合、認承はバイパスされ、オペレーションエンドポイントに接続できるすべてのクライアントがAPIを使用できるようになります。
 
 Metrics
 ^^^^^^^^^
 
 メトリクス
-
-The Fabric CA exposes metrics that can provide insight into the behavior of the system.
-Operators and administrators can use this information to better understand how the system
-is performing over time.
 
 Fabric CAは、システムの動作に関する内部情報を提供できるメトリクスを公開します。 
 オペレーターと管理者は、この情報を使用して、システムが長期にわたってどのように機能しているかをよりよく理解できます。
@@ -1250,26 +1153,15 @@ Configuring Metrics
 
 メトリクスの設定
 
-Fabric CA provides two ways to expose metrics: a **pull** model based on Prometheus
-and a **push** model based on StatsD.
-
 ファブリックCAは、メトリックを公開する2つの方法を提供します。
 Prometheusに基づく **プルモデル** とStatsDに基づく **プッシュモデル** です。
 
 Prometheus
 ^^^^^^^^^^^
 
-A typical Prometheus deployment scrapes metrics by requesting them from an HTTP
-endpoint exposed by instrumented targets. As Prometheus is responsible for
-requesting the metrics, it is considered a pull system.
-
 典型的なプロメテウスの展開では、計測されたターゲットによって公開されたHTTPエンドポイントから
 メトリクスを要求・スクレイピングします。
 Prometheusはメトリクスのリクエストを担当するため、プルシステムと見なされます。
-
-When configured, a Fabric CA Server will present a ``/metrics`` resource
-on the operations service. To enable Prometheus, set the provider value in the
-server's configuration file to ``prometheus``.
 
 設定する際、Fabric CA Serverは、運用サービスに ``/metrics`` リソースを提示します。 
 Prometheusを有効にするには、サーバーの構成ファイルでプロバイダーの値を ``prometheus`` に設定します。
@@ -1282,24 +1174,14 @@ Prometheusを有効にするには、サーバーの構成ファイルでプロ�
 StatsD
 ^^^^^^^
 
-StatsD is a simple statistics aggregation daemon. Metrics are sent to a
-``statsd`` daemon where they are collected, aggregated, and pushed to a backend
-for visualization and alerting. As this model requires instrumented processes
-to send metrics data to StatsD, this is considered a push system.
-
-StatsDは、単純な統計集約デーモンです。 メトリクスは ``statsd`` デーモンに送信され、そこで収集され、集計され、視覚化とアラートのためにバックエンドにプッシュされます。 
+StatsDは、単純な統計集約デーモンです。 メトリクスは ``statsd`` デーモンに送信され、
+そこで収集され、集計され、視覚化とアラートのためにバックエンドにプッシュされます。 
 このモデルでは、メトリクスデータを StatsD に送信するために計測されたプロセスが必要であるため、これはプッシュシステムと見なされます。
 
-The CA Server can be configured to send metrics to StatsD by setting the metrics
-provider to ``statsd`` in the ``metrics`` section in servers' configuration filel. The ``statsd``
-subsection must also be configured with the address of the StatsD daemon, the
-network type to use (``tcp`` or ``udp``), and how often to send the metrics. An
-optional ``prefix`` may be specified to help differentiate the source of the
-metrics --- for example, differentiating metrics coming from separate servers ---
-that would be prepended to all generated metrics.
-
-サーバーの構成ファイルの ``metrics`` セクションでメトリクスプロバイダーを ``statsd`` に設定することで、CA Serverがメトリックを StatsD に送信するように構成できます。
-``statsd`` サブセクションは、StatsD デーモンのアドレス、使用するネットワークタイプ（ ``tcp`` または ``udp`` ）、およびメトリックの送信頻度で構成する必要もあります。
+サーバーの構成ファイルの ``metrics`` セクションでメトリクスプロバイダーを ``statsd`` に設定することで、
+CA Serverがメトリックを StatsD に送信するように構成できます。
+``statsd`` サブセクションは、StatsD デーモンのアドレス、使用するネットワークタイプ（ ``tcp`` または ``udp`` ）、
+およびメトリックの送信頻度で構成する必要もあります。
 オプションの ``prefix`` を指定して、メトリクスのソースを区別できます（たとえば、別々のサーバーからのメトリクスを区別する）。
 これは、生成されたすべてのメトリクスの先頭に追加されます。
 
@@ -1325,19 +1207,7 @@ Fabric CA Client
 
 Fabric CA クライアント
 
-This section describes how to use the fabric-ca-client command.
-
 このセクションでは、fabric-ca-clientコマンドの使用方法について説明します。
-
-The Fabric CA client's home directory is determined as follows:
-  - if the --home command line option is set, use its value
-  - otherwise, if the ``FABRIC_CA_CLIENT_HOME`` environment variable is set, use
-    its value
-  - otherwise, if the ``FABRIC_CA_HOME`` environment variable is set,
-    use its value
-  - otherwise, if the ``CA_CFG_PATH`` environment variable is set, use
-    its value
-  - otherwise, use ``$HOME/.fabric-ca-client``
 
 Fabric CAクライアントのホームディレクトリは、次のように決定されます。
   - –-home コマンドラインオプションが設定されている場合は、その値を使用します
@@ -1346,19 +1216,12 @@ Fabric CAクライアントのホームディレクトリは、次のように�
   - それ以外の場合、 ``CA_CFG_PATH`` 環境変数が設定されている場合は、その値を使用します
   - それ以外の場合は、 ``$HOME/.fabric-ca-client`` を使用します
 
-The instructions below assume that the client configuration file exists
-in the client's home directory.
-
 以下の手順では、クライアント構成ファイルがクライアントのホームディレクトリに存在することを前提としています。
 
 Enrolling the bootstrap identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ブートストラップIDの登録
-
-First, if needed, customize the CSR (Certificate Signing Request) section
-in the client configuration file. Note that ``csr.cn`` field must be set
-to the ID of the bootstrap identity. Default CSR values are shown below:
 
 最初に、必要に応じて、クライアント構成ファイルの証明書署名要求（CSR : Certificate Signing Request）セクションをカスタマイズします。
 ``csr.cn`` フィールドは、ブートストラップIDとして設定する必要があることに注意してください。 
@@ -1384,13 +1247,7 @@ to the ID of the bootstrap identity. Default CSR values are shown below:
         pathlenzero:
         expiry:
 
-See `CSR fields <#csr-fields>`__ for description of the fields.
-
 フィールドの説明については、 `CSRフィールド<#csr-fields>`__ を参照してください。
-
-Then run ``fabric-ca-client enroll`` command to enroll the identity. For example,
-following command enrolls an identity whose ID is **admin** and password is **adminpw**
-by calling Fabric CA server that is running locally at 7054 port.
 
 次に、 ``fabric-ca-client enroll`` コマンドを実行してIDを登録します。 
 たとえば、次のコマンドは、7054ポートでローカルに実行されているFabric CAサーバーを呼び出すことにより、
@@ -1401,10 +1258,6 @@ IDが **admin** でパスワードが **adminpw** のIDを登録します。
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client enroll -u http://admin:adminpw@localhost:7054
 
-The enroll command stores an enrollment certificate (ECert), corresponding private key and CA
-certificate chain PEM files in the subdirectories of the Fabric CA client's ``msp`` directory.
-You will see messages indicating where the PEM files are stored.
-
 enrollコマンドは、登録証明書（ECert）、対応する秘密鍵、およびCA証明書チェーンPEMファイルを
 Fabric CAクライアントの ``msp`` ディレクトリのサブディレクトリに保存します。 
 PEMファイルの保存場所を示すメッセージが表示されます。
@@ -1414,56 +1267,9 @@ Registering a new identity
 
 新しいIDを登録する
 
-The identity performing the register request must be currently enrolled, and
-must also have the proper authority to register the type of the identity that is being
-registered.
-
 登録要求を実行するIDは現在登録されている必要があり、登録するIDのタイプに対する適切な権限も持っている必要があります。
 
-In particular, three authorization checks are made by the Fabric CA server
-during registration as follows:
-
 特に、登録中にFabric CAサーバーによって3つの認証チェックが行われます。
-
-1. The registrar (i.e. the invoker) must have the "hf.Registrar.Roles" attribute with a
-   comma-separated list of values where one of the values equals the type of
-   identity being registered; for example, if the registrar has the
-   "hf.Registrar.Roles" attribute with a value of "peer", the registrar
-   can register identities of type peer, but not client, admin, or orderer.
-
-2. The affiliation of the registrar must be equal to or a prefix of
-   the affiliation of the identity being registered.  For example, an registrar
-   with an affiliation of "a.b" may register an identity with an affiliation
-   of "a.b.c" but may not register an identity with an affiliation of "a.c".
-   If root affiliation is required for an identity, then the affiliation request
-   should be a dot (".") and the registrar must also have root affiliation.
-   If no affiliation is specified in the registration request, the identity being
-   registered will be given the affiliation of the registrar.
-
-3. The registrar can register an identity with attributes if all of the following conditions
-   are satisfied:
-
-   - Registrar can register Fabric CA reserved attributes that have the prefix 'hf.'
-     only if the registrar possesses the attribute and it is part of the value of the
-     hf.Registrar.Attributes' attribute. Furthermore, if the attribute is of type list
-     then the value of attribute being registered must be equal to or a subset of the
-     value that the registrar has. If the attribute is of type boolean, the registrar
-     can register the attribute only if the registrar's value for the attribute is 'true'.
-   - Registering custom attributes (i.e. any attribute whose name does not begin with 'hf.')
-     requires that the registrar has the 'hf.Registar.Attributes' attribute with the value of
-     the attribute or pattern being registered. The only supported pattern is a string with
-     a "*" at the end. For example, "a.b.*" is a pattern which matches all attribute names
-     beginning with "a.b.". For example, if the registrar has hf.Registrar.Attributes=orgAdmin,
-     then the only attribute which the registrar can add or remove from an identity is the
-     'orgAdmin' attribute.
-   - If the requested attribute name is 'hf.Registrar.Attributes', an additional
-     check is performed to see if the requested values for this attribute are equal
-     to or a subset of the registrar's values for 'hf.Registrar.Attributes'. For this
-     to be true, each requested value must match a value in the registrar's value for
-     'hf.Registrar.Attributes' attribute. For example, if the registrar's value for
-     'hf.Registrar.Attributes' is 'a.b.*, x.y.z' and the requested attribute
-     value is 'a.b.c, x.y.z', it is valid because 'a.b.c' matches 'a.b.*' and 'x.y.z'
-     matches the registrar's 'x.y.z' value.
 
 1. レジストラ（つまり、呼び出し側）は、値の1つが登録されているIDのタイプと等しい値のコンマ区切りリストを持つ
    "hf.Registrar.Roles" 属性を持っている必要があります。 
@@ -1494,20 +1300,6 @@ during registration as follows:
      たとえば、 'hf.Registrar.Attributes' のレジストラの値が 'a.b.*, x.y.z' であり、要求された属性値が 'a.b.c, x.y.z' である場合、
       'a.b.c' は 'a.b.*' と一致し、 'x.y.z' は、レジストラの 'x.y.z' 値と一致します。
      
-Examples:
-   Valid Scenarios:
-      1. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'a.b.c', it is valid 'a.b.c' matches 'a.b.*'.
-      2. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         is registering attribute 'x.y.z', it is valid because 'x.y.z' matches the registrar's
-         'x.y.z' value.
-      3. If the registrar has the attribute 'hf.Registrar.Attributes = a.b.*, x.y.z' and
-         the requested attribute value is 'a.b.c, x.y.z', it is valid because 'a.b.c' matches
-         'a.b.*' and 'x.y.z' matches the registrar's 'x.y.z' value.
-      4. If the registrar has the attribute 'hf.Registrar.Roles = peer,client,admin,orderer' and
-         the requested attribute value is 'peer', 'peer,client,admin,orderer', or 'client,admin',
-         it is valid because the requested value is equal to or a subset of the registrar's value.
-
 例:
    有効なシナリオ:
       1. レジストラが属性 'hf.Registrar.Attributes = a.b.*, x.y.z' を持ち、属性 'a.b.c' を登録しようとしている場合、
@@ -1537,9 +1329,6 @@ Examples:
       6. レジストラに属性 'hf.Revoker = false' があり、要求された属性値が 'true' の場合、
          hf.Revoker 属性はブール属性であり、属性のレジストラの値は 'true' ではないため無効です。
 
-The table below lists all the attributes that can be registered for an identity.
-The names of attributes are case sensitive.
-
 次の表に、IDに登録できるすべての属性を示します。 
 属性の名前では大文字と小文字が区別されます。
 
@@ -1561,20 +1350,9 @@ The names of attributes are case sensitive.
 | hf.IntermediateCA           | Boolean    | Identity is able to enroll as an intermediate CA if attribute value is true                                |
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
 
-Note: When registering an identity, you specify an array of attribute names and values. If the array
-specifies multiple array elements with the same name, only the last element is currently used. In other words,
-multi-valued attributes are not currently supported.
-
 注：IDを登録するときは、属性の名前と値の配列を指定します。 
 配列が同じ名前の複数の配列要素を指定する場合、最後の要素のみが現在使用されています。 
 つまり、複数の値を持つ属性は現在サポートされていません。
-
-The following command uses the **admin** identity's credentials to register a new
-identity with an enrollment id of "admin2", an affiliation of
-"org1.department1", an attribute named "hf.Revoker" with a value of "true", and
-an attribute named "admin" with a value of "true".  The ":ecert" suffix means that
-by default the "admin" attribute and its value will be inserted into the identity's
-enrollment certificate, which can then be used to make access control decisions.
 
 次のコマンドは、 **管理者ID** の資格情報を使用して、
 「admin2」というIDを新規登録します。
@@ -1588,18 +1366,9 @@ enrollment certificate, which can then be used to make access control decisions.
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin2 --id.affiliation org1.department1 --id.attrs 'hf.Revoker=true,admin=true:ecert'
 
-The password, also known as the enrollment secret, is printed.
-This password is required to enroll the identity.
-This allows an administrator to register an identity and give the
-enrollment ID and the secret to someone else to enroll the identity.
-
 登録シークレットとも呼ばれるパスワードが表示されます。 
 このパスワードは、IDを登録するために必要です。 
 これにより、管理者はIDを登録し、IDを登録するための登録IDと秘密鍵を他の誰かに渡すことができます。
-
-Multiple attributes can be specified as part of the --id.attrs flag, each
-attribute must be comma separated. For an attribute value that contains a comma,
-the attribute must be encapsulated in double quotes. See example below.
 
 複数の属性を --id.attrs フラグの一部として指定できます。  
 各属性はコンマで区切る必要があります。 
@@ -1610,17 +1379,11 @@ the attribute must be encapsulated in double quotes. See example below.
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,client",hf.Revoker=true'
 
-or
-
 または
 
 .. code:: bash
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,client"' --id.attrs hf.Revoker=true
-
-You may set default values for any of the fields used in the register command
-by editing the client's configuration file.  For example, suppose the configuration
-file contains the following:
 
 クライアントの構成ファイルを編集することにより、registerコマンドで使用される任意のフィールドにデフォルト値を設定できます。 
 たとえば、以下のような構成ファイルだったとします。  
@@ -1638,11 +1401,6 @@ file contains the following:
         - name: anotherAttrName
           value: anotherAttrValue
 
-The following command would then register a new identity with an enrollment id of
-"admin3" which it takes from the command line, and the remainder is taken from the
-configuration file including the identity type: "client", affiliation: "org1.department1",
-and two attributes: "hf.Revoker" and "anotherAttrName".
-
 次のコマンドは、コマンドラインから取得する「admin3」の登録IDで新しいIDを登録し、
 残りは構成ファイルから取得されます
 ID種別：「client」、所属：「org1.department1」 、および2つの属性：「hf.Revoker」および「anotherAttrName」。
@@ -1652,25 +1410,12 @@ ID種別：「client」、所属：「org1.department1」 、および2つの属
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin3
 
-To register an identity with multiple attributes requires specifying all attribute names and values
-in the configuration file as shown above.
-
 複数の属性を持つIDを登録するには、上記のように構成ファイルにすべての属性名と値を指定する必要があります。
-
-Setting `maxenrollments` to 0 or leaving it out from the configuration will result in the identity
-being registered to use the CA's max enrollment value. Furthermore, the max enrollment value for
-an identity being registered cannot exceed the CA's max enrollment value. For example, if the CA's
-max enrollment value is 5. Any new identity must have a value less than or equal to 5, and also
-can't set it to -1 (infinite enrollments).
 
 `maxenrollments` を 0 に設定するか、構成から除外すると、CAの最大登録数を使用するようにIDが登録されます。 
 さらに、登録されるIDの最大登録数は、CAの最大登録数を超えることはできません。 
 たとえば、CAの最大登録値が 5 の場合、新しいIDの値は 5 以下である必要があります。
 また、この値は -1 （無制限）に設定することはできません。
-
-Next, let's register a peer identity which will be used to enroll the peer in the following section.
-The following command registers the **peer1** identity.  Note that we choose to specify our own
-password (or secret) rather than letting the server generate one for us.
 
 次のセクションではピアの登録に使用されるピアIDを登録しましょう。 
 次のコマンドは、**peer1** IDを登録します。 
@@ -1680,10 +1425,6 @@ password (or secret) rather than letting the server generate one for us.
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name peer1 --id.type peer --id.affiliation org1.department1 --id.secret peer1pw
-
-Note that affiliations are case sensitive except for the non-leaf affiliations that are specified in
-the server configuration file, which are always stored in lower case. For example, if the affiliations
-section of the server configuration file looks like this:
 
 サーバー構成ファイルで指定されているleaf以外のaffliationでは、affiliationは大文字と小文字が区別されることに注意してください。
 leaf affiliationは常に小文字で保存されます。 
@@ -1698,11 +1439,6 @@ leaf affiliationは常に小文字で保存されます。
       BU2:
         - Department2
         - Department3
-
-`BU1`, `Department1`, `BU2` are stored in lower case. This is because Fabric CA uses Viper to read configuration.
-Viper treats map keys as case insensitive and always returns lowercase value. To register an identity with
-`Team1` affiliation, `bu1.department1.Team1` would need to be specified to the
-`--id.affiliation` flag as shown below:
 
 `BU1`, `Department1`, `BU2` は小文字で保存されます。 これは、Fabric CAが
 Viper（訳者注：Golangの設定ファイル導入支援ライブラリ）を使用して構成を読み取るためです。
@@ -1719,20 +1455,8 @@ Enrolling a peer identity
 
 ピアIDの登録
 
-Now that you have successfully registered a peer identity, you may now
-enroll the peer given the enrollment ID and secret (i.e. the *password*
-from the previous section).  This is similar to enrolling the bootstrap identity
-except that we also demonstrate how to use the "-M" option to populate the
-Hyperledger Fabric MSP (Membership Service Provider) directory structure.
-
 ピアIDが正常に登録されたので、登録IDとシークレット（つまり、前のセクションのパスワード）を指定してピアを登録できます。 
 これは、ブートストラップIDの登録に似ていますが、「-M」オプションを使用してHyperledger Fabric MSP（Membership Service Provider）のディレクトリ構造を設定する方法も示します。
-
-The following command enrolls peer1.
-Be sure to replace the value of the "-M" option with the path to your
-peer's MSP directory which is the
-'mspConfigPath' setting in the peer's core.yaml file.
-You may also set the FABRIC_CA_CLIENT_HOME to the home directory of your peer.
 
 次のコマンドは、 peer1 を登録します。
 「-M」オプションの値を、ピアの core.yaml ファイルの「mspConfigPath」設定の内容を、ピアのMSPディレクトリへのパスに置き換えてください。
@@ -1743,26 +1467,13 @@ FABRIC_CA_CLIENT_HOME をピアのホームディレクトリに設定するこ�
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client enroll -u http://peer1:peer1pw@localhost:7054 -M $FABRIC_CA_CLIENT_HOME/msp
 
-Enrolling an orderer is the same, except the path to the MSP directory is
-the 'LocalMSPDir' setting in your orderer's orderer.yaml file.
-
 Orderer の登録も同様です。
 MSPディレクトリへのパスが、Orderer の orderer.yaml ファイルの「LocalMSPDir」設定であることに注意してください。
 
-All enrollment certificates issued by the fabric-ca-server have organizational
-units (or "OUs" for short) as follows:
-
 fabric-ca-server によって発行されたすべての登録証明書には、次のような組織単位（Organization Unit 略して「OU」）があります。
-
-1. The root of the OU hierarchy equals the identity type
-2. An OU is added for each component of the identity's affiliation
 
 1. OU階層のルートは、ID種別と等しい
 2. ID の affiliation の各コンポーネントに、OUが追加されます
-
-For example, if an identity is of type `peer` and its affiliation is
-`department1.team1`, the identity's OU hierarchy (from leaf to root) is
-`OU=team1, OU=department1, OU=peer`.
 
 たとえば、IDのタイプが「peer」で、所属が `department1.team1` の場合、
 IDのOU階層（枝葉からルートまで）は `OU=team1, OU=department1, OU=peer` です。
@@ -1772,24 +1483,11 @@ Getting Identity Mixer credential
 
 Identity Mixer資格情報の取得
 
-Identity Mixer (Idemix) is a cryptographic protocol suite for privacy-preserving authentication and transfer of certified attributes.
-Idemix allows clients to authenticate with verifiers without the involvement of the issuer (CA) and selectively disclose only those attributes
-that are required by the verifier and can do so without being linkable across their transactions.
-
 Identity Mixer（Idemix）は、プライバシーを保護する認証および認証された属性の転送のための暗号化プロトコルスイートです。
 Idemixを使用すると、クライアントは発行者（CA）の関与なしに検証者で認証でき、検証者が必要とする属性のみを選択的に開示できます。
 
-Fabric CA server can issue Idemix credentials in addition to X509 certificates. An Idemix credential can be requested by sending the request to
-the ``/api/v1/idemix/credential`` API endpoint. For more information on this and other Fabric CA server API endpoints, please refer to
-`swagger-fabric-ca.json <https://github.com/hyperledger/fabric-ca/blob/master/swagger/swagger-fabric-ca.json>`_.
-
 ファブリックCAサーバーは、X509証明書に加えてIdemix資格情報を発行できます。 Idemix認証情報は、 ``/api/v1/idemix/credential`` APIエンドポイントに要求を送信することで要求できます。
 これおよび他のFabric CAサーバーAPIエンドポイントの詳細については、`swagger-fabric-ca.json <https://github.com/hyperledger/fabric-ca/blob/master/swagger/swagger-fabric-ca.json>`_ を参照してください。
-
-The Idemix credential issuance is a two step process. First, send a request with an empty body to the ``/api/v1/idemix/credential``
-API endpoint to get a nonce and CA's Idemix public key. Second, create a credential request using the nonce and CA's Idemix public key and
-send another request with the credential request in the body to  the ``/api/v1/idemix/credential`` API endpoint to get an Idemix credential,
-Credential Revocation Information (CRI), and attribute names and values. Currently, only three attributes are supported:
 
 Idemixクレデンシャルの発行は2段階のプロセスです。 
 最初に、空のボディを含むリクエストを ``/api/v1/idemix/credential`` APIエンドポイントに送信して、ナンスとCAのIdemix公開キーを取得します。 
@@ -1797,30 +1495,16 @@ Idemixクレデンシャルの発行は2段階のプロセスです。
 それにより、Idemix認証情報、認証情報失効情報（CRI:Credential Revocation Information）、 および属性の名前と値を得ます。 
 現在、次の3つの属性のみがサポートされています。
 
-- **OU** - organization unit of the identity. The value of this attribute is set to identity's affiliation. For example, if identity's affiliation is `dept1.unit1`, then OU attribute is set to `dept1.unit1`
-- **IsAdmin** - if the identity is an admin or not. The value of this attribute is set to the value of `isAdmin` registration attribute.
-- **EnrollmentID** - enrollment ID of the identity
-
 - **OU** - IDの組織単位（Organization Unit）。 この属性の値は、IDの所属に設定されます。 たとえば、IDの所属が `dept1.unit1` の場合、OU属性は  `dept1.unit1` に設定されます。
 - **IsAdmin** - IDが管理者であるかどうか。 この属性の値は、isAdmin 登録属性の値に設定されます。
 - **EnrollmentID** - IDの登録ID。
 
-You can refer to the `handleIdemixEnroll` function in https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go for reference implementation
-of the two step process for getting Idemix credential.
-
 Idemixクレデンシャルを取得するための2ステッププロセスのリファレンス実装については、
 https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go の `handleIdemixEnroll` 関数を参照できます。
-
-The ``/api/v1/idemix/credential`` API endpoint accepts both basic and token authorization headers. The basic authorization header should
-contain User's registration ID and password. If the identity already has X509 enrollment certificate, it can also be used to create a token authorization header.
 
 ``/api/v1/idemix/credential`` APIエンドポイントは、basic認証ヘッダーとトークン認証ヘッダーの両方を受け入れます。 
 basic認証ヘッダーには、ユーザーの登録IDとパスワードが含まれている必要があります。
 IDにすでにX509登録証明書がある場合、トークン認証ヘッダーの作成にも使用できます。
-
-Note that Hyperledger Fabric will support clients to sign transactions with both X509 and Idemix credentials, but will only support X509 credentials
-for peer and orderer identities. As before, applications can use a Fabric SDK to send requests to the Fabric CA server. SDKs hide the complexity
-associated with creating authorization header and request payload, and with processing the response.
 
 Hyperledger Fabricは、X509 と Idemix の両方の資格情報を使用してトランザクションに署名するクライアントをサポートしますが、Peer ID と Oederer ID の X509 資格情報のみをサポートすることに注意してください。
 前と同様に、アプリケーションは Fabric SDK を使用して、Fabric CA サーバーにリクエストを送信できます。 
