@@ -85,8 +85,8 @@ Hyperledger Fabric CAクライアントまたはSDKは、Hyperledger Fabric CA�
 これは、図の右上のセクションに示されています。
 クライアントはHAプロキシエンドポイントにルーティングします。HAプロキシエンドポイントは、ファブリックCAサーバークラスターメンバーの1つにトラフィックを負荷分散します。
 
-クラスター内のすべてのHyperledger Fabric CAサーバーは、IDと証明書を追跡するために同じデータベースを共有します。
-LDAPが構成されている場合、ID情報はデータベースではなくLDAPに保持されます。
+クラスター内のすべてのHyperledger Fabric CAサーバーは、アイデンティティと証明書を追跡するために同じデータベースを共有します。
+LDAPが構成されている場合、アイデンティティ情報はデータベースではなくLDAPに保持されます。
 
 サーバーには複数のCAが含まれる場合があります。
 各CAは、ルートCAまたは中間CAのいずれかです。
@@ -165,7 +165,7 @@ Start Server Natively
 
     fabric-ca-server start -b admin:adminpw
 
-`-b` オプションは、ブートストラップ管理者の登録IDとシークレットを提供します。 
+`-b` オプションは、ブートストラップ管理者の登録ID (enrollment ID) とシークレットを提供します。 
 これは、LDAPが「ldap.enabled」設定で有効になっていない場合に必要です。
 
 `fabric-ca-server-config.yaml`という名前のデフォルト設定ファイルが、ローカルディレクトリに作成され、これはカスタマイズできます。
@@ -361,8 +361,8 @@ Initializing the server
 
     fabric-ca-server init -b admin:adminpw
 
-LDAPが無効になっている場合、初期化には ``-b`` (bootstrap identity) オプションが必要です。 
-Fabric CA serverを起動するには、少なくとも1つのbootstrap identityが必要です。 このIDはサーバー管理者です。
+LDAPが無効になっている場合、初期化には ``-b`` (bootstrap identity：ブートストラップID) オプションが必要です。 
+Fabric CA serverを起動するには、少なくとも1つの ブートストラップID が必要です。 このIDはサーバー管理者です。
 
 サーバー構成ファイルには、構成可能な証明書署名要求（CSR:Certificate Signing Request）セクションが含まれています。 
 以下はCSRのサンプルです。
@@ -404,7 +404,7 @@ CSRのカスタム値が必要な場合は、構成ファイルをカスタマ�
 自己署名CA証明書を生成します。
 ``-u`` が指定されている場合、サーバーのCA証明書は親Fabric CA server によって署名されます。
 親Fabric CA serverへの認証を行うには、URLは ``<scheme>：// <enrollmentID>：<secret> @ <host>：<port>`` の形式である必要があります。
-ここで言及されている、<enrollmentID> および <secret> は 'hf.IntermediateCA' 属性値が「true」であるIDに対応するものになります。
+ここで言及されている、<enrollmentID> および <secret> は 'hf.IntermediateCA' 属性値が「true」であるアイデンティティに対応するものになります。
 ``fabric-ca-server init`` コマンドは、サーバーのホームディレクトリに
 **fabric-ca-server-config.yaml** という名前のデフォルト構成ファイルも生成します。
 
@@ -456,7 +456,7 @@ Starting the server
 Fabric `CAサーバーの初期化 <#initialize>`__セクションを参照してください。
 
 Fabric CA server が LDAP を使用するように構成されていない限り、
-少なくとも1つの事前登録されたブートストラップIDで構成して、他のIDを登録、および登録できるようにする必要があります。
+少なくとも1つの事前登録されたブートストラップIDで構成して、他のアイデンティティを登録、および登録できるようにする必要があります。
 ``-b`` オプションは、ブートストラップIDの名前とパスワードを指定します。
 
 Fabric CAサーバーが ``http`` ではなく ``https`` でリッスンするようにするには、 ``tls.enabled`` を ``true`` に設定します。
@@ -468,7 +468,7 @@ Fabric CAサーバーが ``http`` ではなく ``https`` でリッスンする�
 値を1に設定すると、Fabric CA server は、特定の登録IDに対してパスワードを1回だけ使用することを許可します。
 値を-1に設定すると、Fabric CA server は、登録のためにシークレットを再利用できる回数に制限を設けません。
 デフォルト値は-1です。
-値を0に設定すると、Fabric CAサーバーはすべてのIDの登録を無効にし、IDの登録は許可されません。
+値を0に設定すると、Fabric CAサーバーはすべてのアイデンティティの登録を無効にし、アイデンティティの登録は許可されません。
 
 これで、Fabric CAサーバーはポート7054でリッスンするはずです。
 
@@ -680,8 +680,8 @@ Fabric CAサーバーは、LDAPサーバーから読み取るように構成で�
 
 特に、Fabric CAサーバーはLDAPサーバーに接続して次のことを実行できます。
 
--  登録前に身元を認証する
--  認証に使用されるIDの属性値を取得します。
+-  登録前にアイデンティティを認証する
+-  認証に使用されるアイデンティティの属性値を取得します。
 
 Fabric CAサーバーの構成ファイルのLDAPセクションを変更して、LDAPサーバーに接続するようにサーバーを構成します。
 
@@ -752,7 +752,7 @@ Where:
     ユーザーの「uid」LDAP属性の値が「revoker」で始まる場合、ユーザーには「hf.Revoker」属性の「true」の値が与えられます。
     それ以外の場合、ユーザーには「hf.Revoker」属性に「false」の値が与えられます。
   * the attribute.maps セクションは、LDAP応答値をマップするために使用されます。
-    典型的な使用例は、LDAPグループに関連付けられた識別名をIDタイプにマップすることです。
+    典型的な使用例は、LDAPグループに関連付けられた識別名をID種別にマップすることです。
 
 
 LDAP expression language は、以下で説明されているgovaluateパッケージを使用します。
@@ -811,7 +811,7 @@ LDAPを構成すると、登録は次のように機能します。
 
 -  Fabric CAクライアントまたはクライアントSDKは、basic認証ヘッダーを含む登録要求を送信します。
 -  Fabric CAサーバーは登録要求を受信し、認証ヘッダーのID名とパスワードをデコードし、
-   構成ファイルの “userfilter”  を使用してID名に関連付けられたDN（識別名）を検索し、IDのパスワードでLDAPバインドを試行します。
+   構成ファイルの “userfilter”  を使用してID名に関連付けられたDN（Distinguish Name : 識別名）を検索し、IDのパスワードでLDAPバインドを試行します。
    LDAPバインドが成功すると、登録処理が許可され、続行できます。
 
 
@@ -936,7 +936,7 @@ Enrolling an intermediate CA
 
 中間CAのCA署名証明書を作成するには、fabric-ca-clientがCAに登録するのと同じ方法で、中間CAが親CAに登録する必要があります。
 これは、以下に示すように、-u オプションを使用して、親CAのURLと登録IDおよびシークレットを指定することにより行われます。
-この登録IDに関連付けられたIDには、属性として "hf.IntermediateCA" が "true" となっているものが必要となります。
+この登録IDに関連付けられたアイデンティティには、属性として "hf.IntermediateCA" が "true" となっているものが必要となります。
 中間CAがCN値を明示的に指定しようとすると、エラーが発生します。
 
 .. code:: bash
@@ -1249,9 +1249,9 @@ Enrolling the bootstrap identity
 
 フィールドの説明については、 `CSRフィールド<#csr-fields>`__ を参照してください。
 
-次に、 ``fabric-ca-client enroll`` コマンドを実行してIDを登録します。 
+次に、 ``fabric-ca-client enroll`` コマンドを実行してアイデンティティを登録します。 
 たとえば、次のコマンドは、7054ポートでローカルに実行されているFabric CAサーバーを呼び出すことにより、
-IDが **admin** でパスワードが **adminpw** のIDを登録します。
+IDが **admin** でパスワードが **adminpw** のアイデンティティを登録します。
 
 .. code:: bash
 
@@ -1265,25 +1265,25 @@ PEMファイルの保存場所を示すメッセージが表示されます。
 Registering a new identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-新しいIDを登録する
+新しいアイデンティティを登録する
 
-登録要求を実行するIDは現在登録されている必要があり、登録するIDのタイプに対する適切な権限も持っている必要があります。
+登録要求を実行するアイデンティティは現在登録されている必要があり、登録するアイデンティティのタイプに対する適切な権限も持っている必要があります。
 
 特に、登録中にFabric CAサーバーによって3つの認証チェックが行われます。
 
-1. レジストラ（つまり、呼び出し側）は、値の1つが登録されているIDのタイプと等しい値のコンマ区切りリストを持つ
+1. レジストラ（つまり、呼び出し側）は、値の1つが登録されているアイデンティティのタイプと等しい値のコンマ区切りリストを持つ
    "hf.Registrar.Roles" 属性を持っている必要があります。 
-   たとえば、レジストラに値 "peer" の "hf.Registrar.Roles" 属性がある場合、レジストラはタイプ "peer" のIDを登録できますが、
-   クライアント、管理者、またはOrdererは登録できません。
+   たとえば、レジストラに値 "peer" の "hf.Registrar.Roles" 属性がある場合、レジストラはタイプ "peer" のアイデンティティを登録できますが、
+   クライアント、管理者、またはオーダラーは登録できません。
 
-2. レジストラの affiliation は、登録されているIDの affiliation と同じか、その接頭辞でなければなりません。
-   たとえば、 "a.b" の affiliation を持つレジストラは、 "a.b.c" の affiliation を持つIDを登録できますが、
+2. レジストラの affiliation は、登録されているアイデンティティの affiliation と同じか、その接頭辞でなければなりません。
+   たとえば、 "a.b" の affiliation を持つレジストラは、 "a.b.c" の affiliation を持つアイデンティティを登録できますが、
    "a.c" の affiliation を持つアイデンティティは登録できません。
-   IDに root affiliation が必要な場合、affiliation リクエストはドット（"."）である必要があり、
+   アイデンティティに root affiliation が必要な場合、affiliation リクエストはドット（"."）である必要があり、
    レジストラも root affiliation を持っている必要があります。
-   登録要求に affiliation が指定されていない場合、登録されるIDにはレジストラの affiliation が付与されます。
+   登録要求に affiliation が指定されていない場合、登録されるアイデンティティにはレジストラの affiliation が付与されます。
    
-3. レジストラは、次のすべての条件が満たされている場合、IDと属性を登録できます。
+3. レジストラは、次のすべての条件が満たされている場合、アイデンティティと属性を登録できます。
    - レジストラは、条件を満たせば、プレフィックス 'hf.' を持つFabric CA予約属性を登録できます。
      これは、レジストラが属性を所有し、それが 'hf.Registrar.Attributes' 属性の値の一部である場合に限ります。
      さらに、属性がリスト型の場合、登録される属性の値は、レジストラが持っている値と等しいか、値のサブセットである必要があります。
@@ -1293,7 +1293,7 @@ Registering a new identity
      サポートされている唯一のパターンは、末尾に '*' が付いた文字列です。
      たとえば、'a.b.*' は、 'a.b.' で始まるすべての属性名に一致するパターンです。 
      たとえば、レジストラに hf.Registrar.Attributes=orgAdmin がある場合、
-     レジストラがIDに対して追加または削除できる唯一の属性は 'orgAdmin' 属性です。
+     レジストラがアイデンティティに対して追加または削除できる唯一の属性は 'orgAdmin' 属性です。
    - 要求された属性名が 'hf.Registrar.Attributes' の場合、この属性の要求された値が 'hf.Registrar.Attributes' の
      レジストラの値と等しいかサブセットであるかどうかを確認するため、追加のチェックが実行されます。 
      これが真であるためには、リクエストされた各値が 'hf.Registrar.Attributes' 属性のレジストラの値と一致する必要があります。 
@@ -1329,7 +1329,7 @@ Registering a new identity
       6. レジストラに属性 'hf.Revoker = false' があり、要求された属性値が 'true' の場合、
          hf.Revoker 属性はブール属性であり、属性のレジストラの値は 'true' ではないため無効です。
 
-次の表に、IDに登録できるすべての属性を示します。 
+次の表に、アイデンティティに登録できるすべての属性を示します。 
 属性の名前では大文字と小文字が区別されます。
 
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
@@ -1350,15 +1350,15 @@ Registering a new identity
 | hf.IntermediateCA           | Boolean    | Identity is able to enroll as an intermediate CA if attribute value is true                                |
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
 
-注：IDを登録するときは、属性の名前と値の配列を指定します。 
+注：アイデンティティを登録するときは、属性の名前と値の配列を指定します。 
 配列が同じ名前の複数の配列要素を指定する場合、最後の要素のみが現在使用されています。 
 つまり、複数の値を持つ属性は現在サポートされていません。
 
 次のコマンドは、 **管理者ID** の資格情報を使用して、
-「admin2」というIDを新規登録します。
+「admin2」というアイデンティティを新規登録します。
 属性情報としては、所属は「org1.department1」、「hf.Revoker」属性の値が「true」、「admin」属性の値が「true」です。 
 「:ecert」サフィックスは、デフォルトで「admin」属性のデフォルト値を意味します。
-その値はIDの登録証明書に挿入され、アクセス制御の決定に使用できます。
+その値はアイデンティティの登録証明書に挿入され、アクセス制御の決定に使用できます。
 
 
 .. code:: bash
@@ -1367,8 +1367,8 @@ Registering a new identity
     fabric-ca-client register --id.name admin2 --id.affiliation org1.department1 --id.attrs 'hf.Revoker=true,admin=true:ecert'
 
 登録シークレットとも呼ばれるパスワードが表示されます。 
-このパスワードは、IDを登録するために必要です。 
-これにより、管理者はIDを登録し、IDを登録するための登録IDと秘密鍵を他の誰かに渡すことができます。
+このパスワードは、アイデンティティを登録するために必要です。 
+これにより、管理者はアイデンティティを登録し、アイデンティティを登録するための登録IDと秘密鍵を他の誰かに渡すことができます。
 
 複数の属性を --id.attrs フラグの一部として指定できます。  
 各属性はコンマで区切る必要があります。 
@@ -1401,7 +1401,7 @@ Registering a new identity
         - name: anotherAttrName
           value: anotherAttrValue
 
-次のコマンドは、コマンドラインから取得する「admin3」の登録IDで新しいIDを登録し、
+次のコマンドは、コマンドラインから取得する「admin3」の登録IDで新しいアイデンティティを登録し、
 残りは構成ファイルから取得されます
 ID種別：「client」、所属：「org1.department1」 、および2つの属性：「hf.Revoker」および「anotherAttrName」。
 
@@ -1410,15 +1410,15 @@ ID種別：「client」、所属：「org1.department1」 、および2つの属
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin3
 
-複数の属性を持つIDを登録するには、上記のように構成ファイルにすべての属性名と値を指定する必要があります。
+複数の属性を持つアイデンティティを登録するには、上記のように構成ファイルにすべての属性名と値を指定する必要があります。
 
-`maxenrollments` を 0 に設定するか、構成から除外すると、CAの最大登録数を使用するようにIDが登録されます。 
-さらに、登録されるIDの最大登録数は、CAの最大登録数を超えることはできません。 
-たとえば、CAの最大登録値が 5 の場合、新しいIDの値は 5 以下である必要があります。
+`maxenrollments` を 0 に設定するか、構成から除外すると、CAの最大登録数を使用するようにアイデンティティが登録されます。 
+さらに、登録されるアイデンティティの最大登録数は、CAの最大登録数を超えることはできません。 
+たとえば、CAの最大登録値が 5 の場合、新しいアイデンティティの値は 5 以下である必要があります。
 また、この値は -1 （無制限）に設定することはできません。
 
 次のセクションではピアの登録に使用されるピアIDを登録しましょう。 
-次のコマンドは、**peer1** IDを登録します。 
+次のコマンドは、**peer1** ピアIDを登録します。 
 サーバーにパスワードを生成させるのではなく、独自のパスワード（または秘密鍵）を指定することに注意してください。
 
 .. code:: bash
@@ -1443,7 +1443,7 @@ leaf affiliationは常に小文字で保存されます。
 `BU1`, `Department1`, `BU2` は小文字で保存されます。 これは、Fabric CAが
 Viper（訳者注：Golangの設定ファイル導入支援ライブラリ）を使用して構成を読み取るためです。
 Viperはマップキーを大文字と小文字を区別せずに扱い、常に小文字の値を返します。 
-IDを`Team1` affiliation で登録するには、以下に示すように、 `--id.affiliation` フラグで、`bu1.department1.Team1` を指定する必要があります。
+アイデンティティを`Team1` affiliation で登録するには、以下に示すように、 `--id.affiliation` フラグで、`bu1.department1.Team1` を指定する必要があります。
 
 .. code:: bash
 
@@ -1467,16 +1467,16 @@ FABRIC_CA_CLIENT_HOME をピアのホームディレクトリに設定するこ�
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client enroll -u http://peer1:peer1pw@localhost:7054 -M $FABRIC_CA_CLIENT_HOME/msp
 
-Orderer の登録も同様です。
-MSPディレクトリへのパスが、Orderer の orderer.yaml ファイルの「LocalMSPDir」設定であることに注意してください。
+オーダラーの登録も同様です。
+MSPディレクトリへのパスが、オーダラーの orderer.yaml ファイルの「LocalMSPDir」設定であることに注意してください。
 
 fabric-ca-server によって発行されたすべての登録証明書には、次のような組織単位（Organization Unit 略して「OU」）があります。
 
 1. OU階層のルートは、ID種別と等しい
-2. ID の affiliation の各コンポーネントに、OUが追加されます
+2. ID の 所属 (affiliation) の各コンポーネントに、OUが追加されます
 
-たとえば、IDのタイプが「peer」で、所属が `department1.team1` の場合、
-IDのOU階層（枝葉からルートまで）は `OU=team1, OU=department1, OU=peer` です。
+たとえば、ID種別が「peer」で、所属が `department1.team1` の場合、
+アイデンティティのOU階層（枝葉からルートまで）は `OU=team1, OU=department1, OU=peer` です。
 
 Getting Identity Mixer credential
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1495,18 +1495,18 @@ Idemixクレデンシャルの発行は2段階のプロセスです。
 それにより、Idemix認証情報、認証情報失効情報（CRI:Credential Revocation Information）、 および属性の名前と値を得ます。 
 現在、次の3つの属性のみがサポートされています。
 
-- **OU** - IDの組織単位（Organization Unit）。 この属性の値は、IDの所属に設定されます。 たとえば、IDの所属が `dept1.unit1` の場合、OU属性は  `dept1.unit1` に設定されます。
-- **IsAdmin** - IDが管理者であるかどうか。 この属性の値は、isAdmin 登録属性の値に設定されます。
-- **EnrollmentID** - IDの登録ID。
+- **OU** - アイデンティティの組織単位（Organization Unit）。 この属性の値は、IDの所属に設定されます。 たとえば、IDの所属が `dept1.unit1` の場合、OU属性は  `dept1.unit1` に設定されます。
+- **IsAdmin** - アイデンティティが管理者であるかどうか。 この属性の値は、isAdmin 登録属性の値に設定されます。
+- **EnrollmentID** - アイデンティティの登録ID。
 
 Idemixクレデンシャルを取得するための2ステッププロセスのリファレンス実装については、
 https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go の `handleIdemixEnroll` 関数を参照できます。
 
 ``/api/v1/idemix/credential`` APIエンドポイントは、basic認証ヘッダーとトークン認証ヘッダーの両方を受け入れます。 
 basic認証ヘッダーには、ユーザーの登録IDとパスワードが含まれている必要があります。
-IDにすでにX509登録証明書がある場合、トークン認証ヘッダーの作成にも使用できます。
+アイデンティティにすでにX509登録証明書がある場合、トークン認証ヘッダーの作成にも使用できます。
 
-Hyperledger Fabricは、X509 と Idemix の両方の資格情報を使用してトランザクションに署名するクライアントをサポートしますが、Peer ID と Oederer ID の X509 資格情報のみをサポートすることに注意してください。
+Hyperledger Fabricは、X509 と Idemix の両方の資格情報を使用してトランザクションに署名するクライアントをサポートしますが、ピアID と オーダラーID の X509 資格情報のみをサポートすることに注意してください。
 前と同様に、アプリケーションは Fabric SDK を使用して、Fabric CA サーバーにリクエストを送信できます。 
 SDK は、認証ヘッダーとリクエストペイロードの作成、および応答の処理に関連する複雑さを隠します
 
@@ -1515,34 +1515,36 @@ Getting Idemix CRI (Certificate Revocation Information)
 
 Idemix CRI（証明書失効情報）の取得
 
-An Idemix CRI (Credential Revocation Information) is similar in purpose to an X509 CRL (Certificate Revocation List):
-to revoke what was previously issued.  However, there are some differences.
-
 Idemix CRI（Credential Revocation Information : 資格情報失効情報）は、
 目的が X509 CRL（Credential Revocation List : 証明書失効リスト）と似ており、以前に発行されたものを失効させます。 
 ただし、いくつかの違いがあります。
 
-In X509, the issuer revokes an end user's certificate and its ID is included in the CRL.
-The verifier checks to see if the user's certificate is in the CRL and if so, returns an authorization failure.
-The end user is not involved in this revocation process, other than receiving an authorization error from a verifier.
+X509では、発行者はエンドユーザーの証明書を失効させ、そのIDはCRLに含まれます。
+検証者は、ユーザーの証明書がCRLに含まれているかどうかを確認し、含まれている場合は認証エラーを返します。
+エンドユーザーは、検証者から認証エラーを受信する以外、この失効に関するプロセスには関与しません。
 
-In Idemix, the end user is involved.  The issuer revokes an end user's credential similar to X509 and evidence of this
-revocation is recorded in the CRI.  The CRI is given to the end user (aka "prover").  The end user then generates a
-proof that their credential has not been revoked according to the CRI.  The end user gives this proof to the verifier
-who verifies the proof according to the CRI.
-For verification to succeed, the version of the CRI (known as the "epoch") used by the end user and verifier must be same.
-The latest CRI can be requested by sending a request to ``/api/v1/idemix/cri`` API endpoint.
+Idemixでは、エンドユーザーが関与します。
+発行者は、X509にと同様にエンドユーザーの資格情報を失効させ、この失効の証拠がCRIに記録されます。
+CRIはエンドユーザー（別名「証明者(prover)」）に与えられます。
+次に、エンドユーザーは、CRIに従って資格情報が取り消されていないことの証明を生成します。
+エンドユーザーは、CRIに従って証明を検証する検証者にこの証明を提供します。
+検証を成功させるには、エンドユーザーと検証者が使用するCRIのバージョン（「エポック」と呼ばれる）が同じでなければなりません。
+最新のCRIは、 ``/api/v1/idemix/cri`` APIエンドポイントにリクエストを送信することでリクエストできます。
 
-The version of the CRI is incremented when an enroll request is received by the fabric-ca-server and there are no revocation
-handles remaining in the revocation handle pool. In this case, the fabric-ca-server must generate a new pool of revocation
-handles which increments the epoch of the CRI. The number of revocation handles in the revocation handle pool is configurable
-via the ``idemix.rhpoolsize`` server configuration property.
+登録要求がfabric-ca-serverによって受信され、失効ハンドルプールに失効ハンドルが残っていない場合、CRIのバージョンがインクリメントされます。
+この場合、fabric-ca-serverは、CRIのエポックをインクリメントする失効ハンドルの新しいプールを生成する必要があります。
+失効ハンドルプール内の失効ハンドルの数は、「idemix.rhpoolsize」サーバー設定プロパティを使用して設定できます。
 
 Reenrolling an identity
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+アイデンティティの再登録
+
 Suppose your enrollment certificate is about to expire or has been compromised.
 You can issue the reenroll command to renew your enrollment certificate as follows.
+
+登録証明書の有効期限が間もなく切れる、または侵害されたとします。
+次のように、再登録コマンドを発行して、登録証明書を更新できます。
 
 .. code:: bash
 
@@ -1551,9 +1553,16 @@ You can issue the reenroll command to renew your enrollment certificate as follo
 
 Revoking a certificate or identity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+証明書またはアイデンティティを失効させる
+
 An identity or a certificate can be revoked. Revoking an identity will revoke all
 the certificates owned by the identity and will also prevent the identity from getting
 any new certificates. Revoking a certificate will invalidate a single certificate.
+
+アイデンティティまたは証明書を失効させることができます。
+アイデンティティを失効させると、アイデンティティが所有するすべての証明書が取り消され、アイデンティティが新しい証明書を取得できなくなります。
+証明書を失効させると、単一の証明書が無効になります。
 
 In order to revoke a certificate or an identity, the calling identity must have
 the ``hf.Revoker`` and ``hf.Registrar.Roles`` attribute. The revoking identity
@@ -1562,20 +1571,33 @@ equal to or prefixed by the revoking identity's affiliation. Furthermore, the
 revoker can only revoke identities with types that are listed in the revoker's
 ``hf.Registrar.Roles`` attribute.
 
+証明書またはIDを取り消すには、呼び出しID (calling identity) に ``hf.Revoker`` および ``hf.Registrar.Roles`` 属性が必要です。
+失効IDは、失効IDの所属と同等または接頭辞が付いた所属を持つ証明書またはIDのみを失効できます。
+さらに、リボーカー (revoker : 取り消し者) は、リボーカーの ``hf.Registrar.Roles`` 属性にリストされているタイプのIDのみを取り消すことができます。
+
 For example, a revoker with affiliation **orgs.org1** and 'hf.Registrar.Roles=peer,client'
 attribute can revoke either a **peer** or **client** type identity affiliated with
 **orgs.org1** or **orgs.org1.department1** but can't revoke an identity affiliated with
 **orgs.org2** or of any other type.
 
+たとえば、所属 **orgs.org1** および 'hf.Registrar.Roles=peer,client' 属性を持つリボーカーは、
+**orgs.org1** または **orgs.org1.department1** に関連付けられている **ピア** または **クライアント** タイプのアイデンティティを失効させることができますが、
+**orgs.org2** または、その他関連会社のIDを失効させることはできません。
+
 The following command disables an identity and revokes all of the certificates
 associated with the identity. All future requests received by the Fabric CA server
 from this identity will be rejected.
+
+次のコマンドは、アイデンティティを無効にし、そのアイデンティティに関連付けられているすべての証明書を取り消します。
+Fabric CAサーバーがこのアイデンティティから受信する今後のリクエストはすべて拒否されます。
 
 .. code:: bash
 
     fabric-ca-client revoke -e <enrollment_id> -r <reason>
 
 The following are the supported reasons that can be specified using ``-r`` flag:
+
+以下は、-rフラグを使用して指定できるサポートされている理由です。
 
   1. unspecified
   2. keycompromise
