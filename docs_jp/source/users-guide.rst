@@ -1588,8 +1588,8 @@ The following command disables an identity and revokes all of the certificates
 associated with the identity. All future requests received by the Fabric CA server
 from this identity will be rejected.
 
-次のコマンドは、アイデンティティを無効にし、そのアイデンティティに関連付けられているすべての証明書を取り消します。
-Fabric CAサーバーがこのアイデンティティから受信する今後のリクエストはすべて拒否されます。
+次のコマンドは、アイデンティティを無効にし、そのアイデンティティに関連付けられているすべての証明書を失効させます。
+このアイデンティティからFabric CAサーバーが受信する、今後のリクエストはすべて拒否されます。
 
 .. code:: bash
 
@@ -1597,21 +1597,26 @@ Fabric CAサーバーがこのアイデンティティから受信する今後�
 
 The following are the supported reasons that can be specified using ``-r`` flag:
 
-以下は、-rフラグを使用して指定できるサポートされている理由です。
+以下は、 ``-r`` フラグを使用して指定できるサポートされている理由です。
 
-  1. unspecified
-  2. keycompromise
-  3. cacompromise
-  4. affiliationchange
-  5. superseded
-  6. cessationofoperation
-  7. certificatehold
-  8. removefromcrl
-  9. privilegewithdrawn
-  10. aacompromise
+  1. 不特定 (unspecified)
+  2. 鍵の漏洩 (keycompromise)
+  3. CA弱体化 (cacompromise)
+  4. 所属変更 (affiliationchange)
+  5. 破棄 (superseded)
+  6. 運用停止 (cessationofoperation)
+  7. 証明書保留 (certificatehold)
+  8. CRL からの削除 (removefromcrl)
+  9. 属性証明書の特権が剥奪されたことを示す (privilegewithdrawn)
+  10. AA において信頼性が失われる事象が生じたことを示す (aacompromise)  
+
+（訳者注：表 4-6 証明書失効理由と同等。 https://www.ipa.go.jp/security/pki/042.html）
 
 For example, the bootstrap admin who is associated with root of the affiliation tree
 can revoke **peer1**'s identity as follows:
+
+たとえば、所属ツリーのルートに関連付けられているブートストラップ管理者は、
+次のように **peer1** のアイデンティティを取り消すことができます。
 
 .. code:: bash
 
@@ -1628,6 +1633,8 @@ specifying its AKI (Authority Key Identifier) and serial number as follows:
 For example, you can get the AKI and the serial number of a certificate using the openssl command
 and pass them to the ``revoke`` command to revoke the said certificate as follows:
 
+IDに属する登録証明書は、次のように、AKI（Authority Key Identifier）とシリアル番号を指定することにより失効できます。
+
 .. code:: bash
 
    serial=$(openssl x509 -in userecert.pem -serial -noout | cut -d "=" -f 2)
@@ -1638,6 +1645,9 @@ The `--gencrl` flag can be used to generate a CRL (Certificate Revocation List) 
 certificates. For example, following command will revoke the identity **peer1**, generates a CRL and stores
 it in the **<msp folder>/crls/crl.pem** file.
 
+`--gencrl` フラグを使用して、すべての失効した証明書を含む CRL （証明書失効リスト） を生成できます。
+たとえば、次のコマンドはID **peer1** のアイデンティティを失効させ、CRLを生成して **<msp folder>/crls/crl.pem** ファイルに保存します。
+
 .. code:: bash
 
     fabric-ca-client revoke -e peer1 --gencrl
@@ -1645,8 +1655,14 @@ it in the **<msp folder>/crls/crl.pem** file.
 A CRL can also be generated using the `gencrl` command. Refer to the `Generating a CRL (Certificate Revocation List)`_
 section for more information on the `gencrl` command.
 
+CRLは、 `gencrl`コマンドを使用して生成することもできます。
+`gencrl`コマンドの詳細については、 `Generating a CRL (Certificate Revocation List)`_ セクションを参照してください。
+
 Generating a CRL (Certificate Revocation List)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CRL（証明書失効リスト）の生成
+
 After a certificate is revoked in the Fabric CA server, the appropriate MSPs in Hyperledger Fabric must also be updated.
 This includes both local MSPs of the peers as well as MSPs in the appropriate channel configuration blocks.
 To do this, PEM encoded CRL (certificate revocation list) file must be placed in the `crls`
@@ -1654,8 +1670,17 @@ folder of the MSP. The ``fabric-ca-client gencrl`` command can be used to genera
 with ``hf.GenCRL`` attribute can create a CRL that contains serial numbers of all certificates that were revoked
 during a certain period. The created CRL is stored in the `<msp folder>/crls/crl.pem` file.
 
+Fabric CAサーバーで証明書を失効させた後、Hyperledger Fabricの適切なMSPも更新する必要があります。
+これには、ピアのローカルMSPと適切なチャネル設定の部分にあるMSPの両方が含まれます。
+これを行うには、PEMエンコードCRL（証明書失効リスト）ファイルをMSPの `crls` フォルダーに配置する必要があります。
+``fabric-ca-client gencrl`` コマンドを使用してCRLを生成できます。
+``hf.GenCRL`` 属性を持つアイデンティティは、特定の期間中に取り消されたすべての証明書のシリアル番号を含むCRLを作成できます。
+作成されたCRLは、 `<msp folder>/crls/crl.pem` ファイルに保存されます。
+
 The following command will create a CRL containing all the revoked certficates (expired and unexpired) and
 store the CRL in the `~/msp/crls/crl.pem` file.
+
+次のコマンドは、失効したすべての証明書（期限切れおよび期限切れなし）を含むCRLを作成し、CRLを `~/msp/crls/crl.pem` ファイルに保存します。
 
 .. code:: bash
 
@@ -1666,6 +1691,10 @@ The next command will create a CRL containing all certificates (expired and unex
 2017-09-13T16:39:57-08:00 (specified by the `--revokedafter` flag) and before 2017-09-21T16:39:57-08:00
 (specified by the `--revokedbefore` flag) and store the CRL in the `~/msp/crls/crl.pem` file.
 
+次のコマンドは、すべての失効した証明書（期限切れおよび期限切れなし）のCRLを作成し、`~/msp/crls/crl.pem` にファイルで保存します。
+日付の条件は、2017-09-13T16：39：57-08：00 （ `--revokedafter` フラグで指定） 以降、
+2017-09-21T16：39：57-08：00 （ `--revokedbefore` フラグで指定） となっています。 
+
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
@@ -1675,10 +1704,17 @@ The next command will create a CRL containing all certificates (expired and unex
 The `--caname` flag specifies the name of the CA to which this request is sent. In this example, the gencrl request is
 sent to the default CA.
 
+`--caname` フラグは、このリクエストが送信されるCAの名前を指定します。 
+この例では、 gencrl リクエストは、デフォルトCAに送信されます。
+
 The `--revokedafter` and `--revokedbefore` flags specify the lower and upper boundaries of a time period.
 The generated CRL will contain certificates that were revoked in this time period. The values must be UTC
 timestamps specified in RFC3339 format. The `--revokedafter` timestamp cannot be greater than the
 `--revokedbefore` timestamp.
+
+`--revokedafter` および `--revokedbefore` フラグは、期間の下限と上限を指定します。
+生成されたCRLには、この期間に取り消された証明書が含まれます。 値は RFC3339 形式で指定された UTC タイムスタンプでなければなりません。 
+`--revokedafter` タイムスタンプは `--revokedbefore` タイムスタンプより大きくすることはできません。
 
 By default, 'Next Update' date of the CRL is set to next day. The `crl.expiry` CA configuration property
 can be used to specify a custom value.
