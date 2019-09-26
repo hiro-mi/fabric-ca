@@ -1719,10 +1719,18 @@ timestamps specified in RFC3339 format. The `--revokedafter` timestamp cannot be
 By default, 'Next Update' date of the CRL is set to next day. The `crl.expiry` CA configuration property
 can be used to specify a custom value.
 
+デフォルトでは、CRLの 'Next Update' 日付は翌日に設定されます。 
+`crl.expiry` CA設定プロパティを使用して、カスタム値を指定できます。
+
 The gencrl command will also accept `--expireafter` and `--expirebefore` flags that can be used to generate a CRL
 with revoked certificates that expire during the period specified by these flags. For example, the following command
 will generate a CRL that contains certificates that were revoked after 2017-09-13T16:39:57-08:00 and
 before 2017-09-21T16:39:57-08:00, and that expire after 2017-09-13T16:39:57-08:00 and before 2018-09-13T16:39:57-08:00
+
+gencrl コマンドは、これらのフラグで指定された期間内に失効する失効した証明書でCRLを生成するために使用できる 
+`--expireafter` および `--expirebefore` フラグも受け入れます。
+たとえば、次のコマンドは、2017-09-13T16：39：57-08：00 から 2017-09-21T16：39：57-08：00 の間に失効し、
+その後、2017-09-13T16：39：57-08：00 から 2018-09-13T16：39：57-08：00 の間に期限切れになる証明書を含むCRLを生成します 
 
 .. code:: bash
 
@@ -1732,9 +1740,15 @@ before 2017-09-21T16:39:57-08:00, and that expire after 2017-09-13T16:39:57-08:0
 Enabling TLS
 ~~~~~~~~~~~~
 
+TLSを有効にする
+
 This section describes in more detail how to configure TLS for a Fabric CA client.
 
 The following sections may be configured in the ``fabric-ca-client-config.yaml``.
+
+このセクションでは、Fabric CAクライアントのTLSを構成する方法について詳しく説明します。
+
+次のセクションは ``fabric-ca-client-config.yaml`` で設定できます。
 
 .. code:: yaml
 
@@ -1755,16 +1769,29 @@ file.
 The **client** option is required only if mutual TLS is configured on
 the server.
 
+**certfiles** オプションは、クライアントが信頼するルート証明書のセットです。
+これは通常、 **ca-cert.pem** ファイル内のサーバーのホームディレクトリにあるルートファブリックCAサーバーの証明書になります。
+
+**client** オプションは、サーバーで mutal TLS が構成されている場合にのみ必要です。
+
 Attribute-Based Access Control
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+属性ベースのアクセス制御
 
 Access control decisions can be made by chaincode (and by the Hyperledger Fabric runtime)
 based upon an identity's attributes.  This is called
 **Attribute-Based Access Control**, or **ABAC** for short.
 
+アクセス制御の決定は、アイデンティティの属性に基づいてチェーンコード （および Hyperledger Fabric ランタイム） によって行うことができます。
+これは、 **属性ベースのアクセス制御 : Attribute-Based Access Control** 、または略して **ABAC** と呼ばれます。
+
 In order to make this possible, an identity's enrollment certificate (ECert)
 may contain one or more attribute name and value.  The chaincode then
 extracts an attribute's value to make an access control decision.
+
+これを可能にするために、IDの登録証明書 （ECert） に1つ以上の属性名と値が含まれる場合があります。
+次に、チェーンコードは属性の値を抽出して、アクセス制御の決定を行います。
 
 For example, suppose that you are developing application *app1* and want a
 particular chaincode operation to be accessible only by app1 administrators.
@@ -1773,8 +1800,14 @@ a CA trusted for the channel) contains an attribute named *app1Admin* with a
 value of *true*.  Of course the name of the attribute can be anything and the
 value need not be a boolean value.
 
+たとえば、アプリケーション *app1* を開発しており、特定のチェーンコード操作に app1 管理者のみがアクセスできるようにするとします。
+チェーンコードは、呼び出し元の証明書 （チャネルに対して信頼されている CA によって発行された） に *app1Admin* という名前の値が *true* の属性が含まれていることを確認できます。
+もちろん、属性の名前は何でもよく、値はブール値である必要はありません。
+
 So how do you get an enrollment certificate with an attribute?
 There are two methods:
+
+属性付きの登録証明書をどのように取得するか、それには2つの方法があります。
 
 1.   When you register an identity, you can specify that an enrollment certificate
      issued for the identity should by default contain an attribute.  This behavior
