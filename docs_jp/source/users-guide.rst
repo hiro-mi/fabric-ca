@@ -1848,8 +1848,8 @@ There are two methods:
    without the *app1Admin* attribute, and optionally with the *phone*
    attribute (if the user possesses the *phone* attribute).
 
-以下に、*user1* を *email* 属性で登録し、*app1Admin* 属性なしで、
-オプションで *phone* 属性を登録する方法を示します（ユーザーが *phone* 属性を所有している場合）。
+   以下に、*user1* を *email* 属性で登録し、*app1Admin* 属性なしで、
+   オプションで *phone* 属性を登録する方法を示します（ユーザーが *phone* 属性を所有している場合）。
 
 .. code:: bash
 
@@ -1897,22 +1897,35 @@ Dynamic Server Configuration Update
 This section describes how to use fabric-ca-client to dynamically update portions
 of the fabric-ca-server's configuration without restarting the server.
 
-
+このセクションでは、 fabric-ca-client を使用して、サーバーを再起動せずに fabric-ca-server の構成の一部を
+動的に更新する方法について説明します。
 
 All commands in this section require that you first be enrolled by executing the
 `fabric-ca-client enroll` command.
 
+このセクションのすべてのコマンドでは、最初に「fabric-ca-client enroll」コマンドを実行して登録する必要があります。
+
 Dynamically updating identities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+アイデンティティを動的に更新する
+
 This section describes how to use fabric-ca-client to dynamically update identities.
 
+このセクションでは、 fabric-ca-client を使用してアイデンティティを動的に更新する方法について説明します。
+
 An authorization failure will occur if the client identity does not satisfy all of the following:
+
+クライアントのアイデンティティが次のすべてを満たしていない場合、認証エラーが発生します。
 
  - The client identity must possess the "hf.Registrar.Roles" attribute with a comma-separated list of
    values where one of the values equals the type of identity being updated; for example, if the client's
    identity has the "hf.Registrar.Roles" attribute with a value of "client", the client can update
    identities of type 'client', but not 'peer'.
+   
+ - クライアントのアイデンティティには、値の1つが更新されるIDのタイプに等しい値のコンマ区切りリストを持つ「hf.Registrar.Roles」属性が必要です。  
+   たとえば、クライアントのアイデンティティに「hf.Registrar.Roles」属性があり、その値が値「client」の場合、
+   クライアントは種別が「peer」ではなく「client」のアイデンティティを更新できます。
 
  - The affiliation of the client's identity must be equal to or a prefix of the affiliation of the identity
    being updated.  For example, a client with an affiliation of "a.b" may update an identity with an affiliation
@@ -1920,14 +1933,25 @@ An authorization failure will occur if the client identity does not satisfy all 
    identity, then the update request should specify a dot (".") for the affiliation and the client must also have
    root affiliation.
 
+ - クライアントのアイデンティティの所属 (affiliation) は、更新されるアイデンティティの所属と等しいか、プレフィックスである必要があります。  
+   たとえば、「a.b」の所属を持つクライアントは、「a.b.c」の所属を持つアイデンティティを更新できますが、「a.c」の所属を持つアイデンティティは更新できません。
+   アイデンティティにルート所属が必要な場合、更新要求は所属にドット（"."）を指定する必要があり、クライアントにもルート所属が必要です。
+
 The following shows how to add, modify, and remove an affiliation.
+
+以下に、所属を追加、変更、削除する方法を示しています。
 
 Getting Identity Information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+アイデンティティ情報の取得
+
 A caller may retrieve information on a identity from the fabric-ca server as long as the caller meets
 the authorization requirements highlighted in the section above. The following command shows how to get an
 identity.
+
+発信者は、上記のセクションで強調表示されている承認要件を満たしている限り、fabric CA サーバーからアイデンティティに関する情報を取得できます。  
+次のコマンドは、アイデンティティを取得する方法を示しています。
 
 .. code:: bash
 
@@ -1936,6 +1960,8 @@ identity.
 A caller may also request to retrieve information on all identities that it is authorized to see by
 issuing the following command.
 
+呼び出し元は、次のコマンドを発行することにより、表示が許可されているすべてのアイデンティティに関する情報の取得を要求することもできます。
+
 .. code:: bash
 
     fabric-ca-client identity list
@@ -1943,9 +1969,16 @@ issuing the following command.
 Adding an identity
 """""""""""""""""""
 
+アイデンティティを追加する
+
 The following adds a new identity for 'user1'. Adding a new identity performs the same action as registering an
 identity via the 'fabric-ca-client register' command. There are two available methods for adding a new identity.
 The first method is via the `--json` flag where you describe the identity in a JSON string.
+
+以下は、「user1」の新しいアイデンティティを追加します。 新しいアイデンティティを追加すると、
+「fabric-ca-client register」コマンドを使用してアイデンティティを登録するのと同じアクションが実行されます。 
+新しいアイデンティティを追加する方法は2つあります。
+最初の方法は、JSON文字列でIDを記述する「--json」フラグを使用する方法です。
 
 .. code:: bash
 
@@ -1953,17 +1986,25 @@ The first method is via the `--json` flag where you describe the identity in a J
 
 The following adds a user with root affiliation. Note that an affiliation name of "." means the root affiliation.
 
+以下は、ルート所属のユーザーを追加します。 所属名が「.」であることに注意してください。  
+ルート所属を意味します。
+
 .. code:: bash
 
     fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "client", "affiliation": ".", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
 
 The second method for adding an identity is to use direct flags. See the example below for adding 'user1'.
 
+アイデンティティを追加する2番目の方法は、直接フラグを使用することです。  
+「user1」の追加については、以下の例を参照してください。
+
 .. code:: bash
 
     fabric-ca-client identity add user1 --secret user1pw --type client --affiliation . --maxenrollments 1 --attrs hf.Revoker=true
 
 The table below lists all the fields of an identity and whether they are required or optional, and any default values they might have.
+
+以下の表は、アイデンティティのすべてのフィールド、それらが必須またはオプションであるかどうか、およびそれらがデフォルト値として入る可能性のある値の一覧です。
 
 +----------------+------------+------------------------+
 | Fields         | Required   | Default Value          |
