@@ -1815,12 +1815,20 @@ There are two methods:
      default behavior and, assuming registration occurs outside of your application,
      does not require any application change.
 
+1.   アイデンティティを登録するときに、アイデンティティに対して発行される登録証明書にデフォルトで属性が含まれるように指定できます。
+     この動作は、登録時にオーバーライドできますが、これはデフォルトの動作を確立するのに役立ち、
+     アプリケーションの外部で登録が行われる場合、アプリケーションの変更は不要です。
+
      The following shows how to register *user1* with two attributes:
      *app1Admin* and *email*.
      The ":ecert" suffix causes the *appAdmin* attribute to be inserted into user1's
      enrollment certificate by default, when the user does not explicitly request
      attributes at enrollment time.  The *email* attribute is not added
      to the enrollment certificate by default.
+
+     以下は、 *user1* を、次の2つの属性、 *app1Admin* と  *email* で登録する方法を示しています。
+     「：ecert」サフィックスにより、ユーザーが登録時に明示的に属性を要求しない場合、デフォルトで *appAdmin* 属性が user1 の登録証明書に挿入されます。
+     デフォルトでは、 *email* 属性は登録証明書に追加されません。
 
 .. code:: bash
 
@@ -1832,9 +1840,16 @@ There are two methods:
    optional or not.  If it is not requested optionally and the identity does
    not possess the attribute, an error will occur.
 
+2. IDを登録するときに、1つ以上の属性を証明書に追加することを明示的に要求できます。
+   要求された属性ごとに、属性がオプションかどうかを指定できます。
+   オプションで要求されず、IDに属性がない場合、エラーが発生します。
+
    The following shows how to enroll *user1* with the *email* attribute,
    without the *app1Admin* attribute, and optionally with the *phone*
    attribute (if the user possesses the *phone* attribute).
+
+以下に、*user1* を *email* 属性で登録し、*app1Admin* 属性なしで、
+オプションで *phone* 属性を登録する方法を示します（ユーザーが *phone* 属性を所有している場合）。
 
 .. code:: bash
 
@@ -1842,12 +1857,14 @@ There are two methods:
 
 The table below shows the three attributes which are automatically registered for every identity.
 
+次の表は、すべてのIDに対して自動的に登録される3つの属性を示しています。
+
 ===================================   =====================================
      Attribute Name                               Attribute Value
 ===================================   =====================================
-  hf.EnrollmentID                        The enrollment ID of the identity
-  hf.Type                                The type of the identity
-  hf.Affiliation                         The affiliation of the identity
+  hf.EnrollmentID                        アイデンティティの登録ID
+  hf.Type                                アイデンティティの種別
+  hf.Affiliation                         アイデンティティの所属
 ===================================   =====================================
 
 To add any of the above attributes **by default** to a certificate, you must
@@ -1858,6 +1875,10 @@ no specific attributes are requested at enrollment time.  Note that the
 value of the affiliation (which is 'org1') must be the same in both the
 '--id.affiliation' and the '--id.attrs' flags.
 
+上記の属性のいずれかを **デフォルトで** 証明書に追加するには、「:ecert」仕様で属性を明示的に登録する必要があります。
+たとえば、以下は、登録時に特定の属性が要求されない場合に登録証明書に「hf.Affiliation」属性が追加されるように、アイデンティティ「user1」を登録します。
+アフィリエーションの値（「org1」）は、「--id.affiliation」フラグと「--id.attrs」フラグの両方で同じでなければならないことに注意してください。
+
 .. code:: bash
 
     fabric-ca-client register --id.name user1 --id.secret user1pw --id.type client --id.affiliation org1 --id.attrs 'hf.Affiliation=org1:ecert'
@@ -1865,11 +1886,18 @@ value of the affiliation (which is 'org1') must be the same in both the
 For information on the chaincode library API for Attribute-Based Access Control,
 see `https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md>`_
 
+属性ベースのアクセス制御用のチェーンコードライブラリAPIについては、以下を参照してください  
+`https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md>`_
+
 Dynamic Server Configuration Update
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+動的サーバー構成の更新
+
 This section describes how to use fabric-ca-client to dynamically update portions
 of the fabric-ca-server's configuration without restarting the server.
+
+
 
 All commands in this section require that you first be enrolled by executing the
 `fabric-ca-client enroll` command.
