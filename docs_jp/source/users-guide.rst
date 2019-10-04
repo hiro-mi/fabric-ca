@@ -2026,13 +2026,23 @@ The table below lists all the fields of an identity and whether they are require
 Modifying an identity
 """"""""""""""""""""""
 
+アイデンティティの変更
+
 There are two available methods for modifying an existing identity. The first method is via the `--json` flag where you describe
 the modifications in to an identity in a JSON string. Multiple modifications can be made in a single request. Any element of an identity that
 is not modified will retain its original value.
 
+既存のアイデンティを変更する方法は2つあります。
+最初の方法は、 `--json` フラグを使用して、JSON文字列でアイデンティの変更を記述する方法です。
+1つのリクエストで複数の変更を行うことができます。 変更されていないアイデンティティの要素は、元の値を保持します。
+
 NOTE: A maxenrollments value of "-2" specifies that the CA's max enrollment setting is to be used.
 
 The command below make multiple modification to an identity using the --json flag.
+
+注：maxenrollments の値が「-2」になっているのは、CAの最大登録設定が使用されることを指定します。
+
+以下のコマンドは、--jsonフラグを使用してIDに複数の変更を加えます。
 
 .. code:: bash
 
@@ -2040,17 +2050,24 @@ The command below make multiple modification to an identity using the --json fla
 
 The commands below make modifications using direct flags. The following updates the enrollment secret (or password) for identity 'user1' to 'newsecret'.
 
+以下のコマンドは、直接フラグを使用して変更を加えます。
+ID「user1」の登録シークレット（またはパスワード）を「newsecret」に更新します。
+
 .. code:: bash
 
     fabric-ca-client identity modify user1 --secret newsecret
 
 The following updates the affiliation of identity 'user1' to 'org2'.
 
+以下は、ID「user1」の所属を「org2」に更新します。
+
 .. code:: bash
 
     fabric-ca-client identity modify user1 --affiliation org2
 
 The following updates the type of identity 'user1' to 'peer'.
+
+以下は、ID「user1」のタイプを「peer」に更新します。
 
 .. code:: bash
 
@@ -2059,12 +2076,16 @@ The following updates the type of identity 'user1' to 'peer'.
 
 The following updates the maxenrollments of identity 'user1' to 5.
 
+以下は、ID 「user1」の maxenrollments を 5 に更新します。
+
 .. code:: bash
 
     fabric-ca-client identity modify user1 --maxenrollments 5
 
 By specifying a maxenrollments value of '-2', the following causes identity 'user1' to use
 the CA's max enrollment setting.
+
+「-2」のmaxenrollments値を指定することにより、ID「user1」は CA の最大登録設定を使用します。
 
 .. code:: bash
 
@@ -2075,11 +2096,18 @@ If the identity has other attributes, they are not changed.  If the identity did
 possess the 'hf.Revoker' attribute, the attribute is added to the identity. An attribute may
 also be removed by specifying no value for the attribute.
 
+以下は、ID「user1」の「hf.Revoker」属性の値を「false」に設定します。
+IDに他の属性がある場合、それらは変更されません。
+IDが以前に 'hf.Revoker'属性を所有していなかった場合、属性はIDに追加されます。
+属性に値を指定しないことにより、属性を削除することもできます。
+
 .. code:: bash
 
     fabric-ca-client identity modify user1 --attrs hf.Revoker=false
 
 The following removes the 'hf.Revoker' attribute for user 'user1'.
+
+以下は、ユーザー「user1」の「hf.Revoker」属性を削除します。
 
 .. code:: bash
 
@@ -2088,6 +2116,9 @@ The following removes the 'hf.Revoker' attribute for user 'user1'.
 The following demonstrates that multiple options may be used in a single `fabric-ca-client identity modify`
 command. In this case, both the secret and the type are updated for user 'user1'.
 
+以下は、単一の「fabric-ca-client identity modify」コマンドで複数のオプションを使用できることを示しています。 
+この場合、ユーザー 「user1」のシークレットと種別の両方が更新されます。
+
 .. code:: bash
 
     fabric-ca-client identity modify user1 --secret newpass --type peer
@@ -2095,7 +2126,11 @@ command. In this case, both the secret and the type are updated for user 'user1'
 Removing an identity
 """""""""""""""""""""
 
+アイデンティティの削除
+
 The following removes identity 'user1' and also revokes any certificates associated with the 'user1' identity.
+
+次の例では、ID「user1」を削除し、「user1」 アイデンティに関連付けられているすべての証明書を失効させます。
 
 .. code:: bash
 
@@ -2104,14 +2139,24 @@ The following removes identity 'user1' and also revokes any certificates associa
 Note: Removal of identities is disabled in the fabric-ca-server by default, but may be enabled
 by starting the fabric-ca-server with the `--cfg.identities.allowremove` option.
 
+注：アイデンティティの削除はデフォルトで fabric-ca-server で無効になっていますが、
+`--cfg.identities.allowremove` オプションで fabric-ca-server を起動することで有効にできます。
+
 Dynamically updating affiliations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+所属を動的に更新する
 
 This section describes how to use fabric-ca-client to dynamically update affiliations. The
 following shows how to add, modify, remove, and list an affiliation.
 
+このセクションでは、 fabric-ca-client を使用して所属を動的に更新する方法について説明します。 
+以下に、アフィリエーションを追加、変更、削除、およびリストする方法を示します。
+
 Adding an affiliation
 """""""""""""""""""""""
+
+所属を追加する
 
 An authorization failure will occur if the client identity does not satisfy all of the following:
 
@@ -2122,12 +2167,25 @@ An authorization failure will occur if the client identity does not satisfy all 
 
 The following adds a new affiliation named ‘org1.dept1’.
 
+
+クライアントのアイデンティが次のすべてを満たしていない場合、認証エラーが発生します。
+
+  - クライアントのアイデンティは、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。
+  - クライアントIDの所属は、更新される所属の上に階層的になければなりません。
+    たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a」または「a.b」を追加できませんが、「a.b.c」を追加できます。
+
+The following adds a new affiliation named ‘org1.dept1’.
+
+以下は、「org1.dept1」という名前の新しい所属を追加します。
+
 .. code:: bash
 
     fabric-ca-client affiliation add org1.dept1
 
 Modifying an affiliation
 """""""""""""""""""""""""
+
+所属の変更
 
 An authorization failure will occur if the client identity does not satisfy all of the following:
 
@@ -2141,6 +2199,17 @@ An authorization failure will occur if the client identity does not satisfy all 
 The following renames the 'org2' affiliation to 'org3'.  It also renames any sub affiliations
 (e.g. 'org2.department1' is renamed to 'org3.department1').
 
+クライアントのアイデンティが次のすべてを満たしていない場合、認証エラーが発生します。  
+
+  - クライアントのアイデンティには、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。  
+  - クライアントアイデンティティのアフィリエーションは、更新されるアフィリエーションの上に階層的になければなりません。  
+    クライアントアイデンティの所属は、更新される所属の上に階層的になければなりません。  
+    たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a」または「a.b」を追加できませんが、「a.b.c」を追加できます。  
+  - 「--force」オプションがtrueであり、変更する必要があるアイデンティが存在する場合、クライアントのアイデンティにアイデンティを変更する権限が必要です。  
+
+以下は、「org2」所属の名前を「org3」に変更します。 また、サブ所属の名前も変更します
+（たとえば、「org2.department1」は「org3.department1」に名前が変更されます）。  
+
 .. code:: bash
 
     fabric-ca-client affiliation modify org2 --name org3
@@ -2149,12 +2218,17 @@ If there are identities that are affected by the renaming of an affiliation, it 
 an error unless the '--force' option is used. Using the '--force' option will update the affiliation
 of identities that are affected to use the new affiliation name.
 
+所属の名前変更の影響を受けるアイデンティティがある場合、「--force」オプションを使用しない限りエラーになります。  
+「--force」オプションを使用すると、影響を受けるアイデンティティの所属が更新され、新しい所属名が使用されます。  
+
 .. code:: bash
 
     fabric-ca-client affiliation modify org1 --name org2 --force
 
 Removing an affiliation
 """""""""""""""""""""""""
+
+所属の削除
 
 An authorization failure will occur if the client identity does not satisfy all of the following:
 
@@ -2168,6 +2242,21 @@ An authorization failure will occur if the client identity does not satisfy all 
 The following removes affiliation 'org2' and also any sub affiliations.
 For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
 
+クライアントIDが次のすべてを満たしていない場合、認証エラーが発生します。  
+
+
+  - クライアントのアイデンティには、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。  
+  - クライアントアイデンティティのアフィリエーションは、更新されるアフィリエーションの上に階層的になければなりません。  
+    クライアントアイデンティの所属は、更新される所属の上に階層的になければなりません。  
+    たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a」または「a.b」を削除できませんが、「a.b.c」を削除できます。  
+  - 「--force」オプションがtrueであり、変更する必要があるアイデンティが存在する場合、クライアントのアイデンティにアイデンティを変更する権限が必要です。  
+
+The following removes affiliation 'org2' and also any sub affiliations.
+For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
+
+以下は、所属「org2」および、それにつらなる従属する所属も削除します。
+たとえば、「org2.dept1」が「org2」に従属する所属である場合、それも削除されます。
+
 .. code:: bash
 
     fabric-ca-client affiliation remove org2
@@ -2177,8 +2266,15 @@ in an error unless the '--force' option is used. Using the '--force' option will
 all identities that are associated with that affiliation, and the certificates associated with
 any of these identities.
 
+所属の削除により影響を受けるアイデンティティがある場合、「--force」オプションを使用しない限りエラーになります。
+「--force」オプションを使用すると、そのアフィリエーションに関連付けられているすべてのアイデンティティ、
+およびこれらのアイデンティティのいずれかに関連付けられている証明書も削除されます。
+
 Note: Removal of affiliations is disabled in the fabric-ca-server by default, but may be enabled
 by starting the fabric-ca-server with the `--cfg.affiliations.allowremove` option.
+
+注：アフィリエーションの削除は、デフォルトでは fabric-ca-server で無効になっていますが、 
+`--cfg.affiliations.allowremove` オプションで fabric-ca-server を起動することで有効にできます。
 
 Listing affiliation information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
