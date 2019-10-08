@@ -2279,6 +2279,8 @@ by starting the fabric-ca-server with the `--cfg.affiliations.allowremove` optio
 Listing affiliation information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+所属情報のリスト
+
 An authorization failure will occur if the client identity does not satisfy all of the following:
 
   - The client identity must possess the attribute 'hf.AffiliationMgr' with a value of 'true'.
@@ -2288,12 +2290,27 @@ An authorization failure will occur if the client identity does not satisfy all 
 
 The following command shows how to get a specific affiliation.
 
+クライアントIDが次のすべてを満たしていない場合、認証エラーが発生します。
+
+  - Affiliation of the client identity must be equal to or be hierarchically above the
+    affiliation being updated. For example, if the client's affiliation is "a.b",
+    the client may get affiliation information on "a.b" or "a.b.c" but not "a" or "a.c".
+  - クライアントのアイデンティには、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。  
+  - クライアントアイデンティティのアフィリエーションは、更新されるアフィリエーションに対して従属する階層になければなりません。  
+    クライアントアイデンティの所属は、取得する所属に対して従属する階層になければなりません。  
+    たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a.b」または「a.b.c」を取得できますが、「a」または「a.c」を取得できません。  
+
+次のコマンドは、特定の所属を取得する方法を示しています。
+
+
 .. code:: bash
 
     fabric-ca-client affiliation list --affiliation org2.dept1
 
 A caller may also request to retrieve information on all affiliations that it is authorized to see by
 issuing the following command.
+
+呼び出し元は、次のコマンドを発行することにより、表示を許可されているすべての所属に関する情報の取得を要求することもできます。
 
 .. code:: bash
 
