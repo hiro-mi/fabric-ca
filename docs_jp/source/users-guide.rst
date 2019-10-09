@@ -119,6 +119,8 @@ Prerequisites
 .. note:: libtldl-dev is not necessary on MacOSX if you instal
           libtool via Homebrew
 
+.. note:: libtldl-dev は MacOSX では必要ない。libtool を Homebrew でインストールしてあればよい。
+
 libtoolの詳細については、以下を参照してください。
 https://www.gnu.org/software/libtool
 
@@ -1540,9 +1542,6 @@ Reenrolling an identity
 
 アイデンティティの再登録
 
-Suppose your enrollment certificate is about to expire or has been compromised.
-You can issue the reenroll command to renew your enrollment certificate as follows.
-
 登録証明書の有効期限が間もなく切れる、または侵害されたとします。
 次のように、再登録コマンドを発行して、登録証明書を更新できます。
 
@@ -1556,37 +1555,17 @@ Revoking a certificate or identity
 
 証明書またはアイデンティティを失効させる
 
-An identity or a certificate can be revoked. Revoking an identity will revoke all
-the certificates owned by the identity and will also prevent the identity from getting
-any new certificates. Revoking a certificate will invalidate a single certificate.
-
 アイデンティティまたは証明書を失効させることができます。
 アイデンティティを失効させると、アイデンティティが所有するすべての証明書が取り消され、アイデンティティが新しい証明書を取得できなくなります。
 証明書を失効させると、単一の証明書が無効になります。
-
-In order to revoke a certificate or an identity, the calling identity must have
-the ``hf.Revoker`` and ``hf.Registrar.Roles`` attribute. The revoking identity
-can only revoke a certificate or an identity that has an affiliation that is
-equal to or prefixed by the revoking identity's affiliation. Furthermore, the
-revoker can only revoke identities with types that are listed in the revoker's
-``hf.Registrar.Roles`` attribute.
 
 証明書またはIDを取り消すには、呼び出しID (calling identity) に ``hf.Revoker`` および ``hf.Registrar.Roles`` 属性が必要です。
 失効IDは、失効IDの所属と同等または接頭辞が付いた所属を持つ証明書またはIDのみを失効できます。
 さらに、リボーカー (revoker : 取り消し者) は、リボーカーの ``hf.Registrar.Roles`` 属性にリストされているタイプのIDのみを取り消すことができます。
 
-For example, a revoker with affiliation **orgs.org1** and 'hf.Registrar.Roles=peer,client'
-attribute can revoke either a **peer** or **client** type identity affiliated with
-**orgs.org1** or **orgs.org1.department1** but can't revoke an identity affiliated with
-**orgs.org2** or of any other type.
-
 たとえば、所属 **orgs.org1** および 'hf.Registrar.Roles=peer,client' 属性を持つリボーカーは、
 **orgs.org1** または **orgs.org1.department1** に関連付けられている **ピア** または **クライアント** タイプのアイデンティティを失効させることができますが、
 **orgs.org2** または、その他関連会社のIDを失効させることはできません。
-
-The following command disables an identity and revokes all of the certificates
-associated with the identity. All future requests received by the Fabric CA server
-from this identity will be rejected.
 
 次のコマンドは、アイデンティティを無効にし、そのアイデンティティに関連付けられているすべての証明書を失効させます。
 このアイデンティティからFabric CAサーバーが受信する、今後のリクエストはすべて拒否されます。
@@ -1594,8 +1573,6 @@ from this identity will be rejected.
 .. code:: bash
 
     fabric-ca-client revoke -e <enrollment_id> -r <reason>
-
-The following are the supported reasons that can be specified using ``-r`` flag:
 
 以下は、 ``-r`` フラグを使用して指定できるサポートされている理由です。
 
@@ -1611,9 +1588,6 @@ The following are the supported reasons that can be specified using ``-r`` flag:
   10. AA において信頼性が失われる事象が生じたことを示す (aacompromise)  
 
 （訳者注：表 4-6 証明書失効理由と同等。 https://www.ipa.go.jp/security/pki/042.html）
-
-For example, the bootstrap admin who is associated with root of the affiliation tree
-can revoke **peer1**'s identity as follows:
 
 たとえば、所属ツリーのルートに関連付けられているブートストラップ管理者は、
 次のように **peer1** のアイデンティティを取り消すことができます。
@@ -1641,19 +1615,12 @@ IDに属する登録証明書は、次のように、AKI（Authority Key Identif
    aki=$(openssl x509 -in userecert.pem -text | awk '/keyid/ {gsub(/ *keyid:|:/,"",$1);print tolower($0)}')
    fabric-ca-client revoke -s $serial -a $aki -r affiliationchange
 
-The `--gencrl` flag can be used to generate a CRL (Certificate Revocation List) that contains all the revoked
-certificates. For example, following command will revoke the identity **peer1**, generates a CRL and stores
-it in the **<msp folder>/crls/crl.pem** file.
-
 `--gencrl` フラグを使用して、すべての失効した証明書を含む CRL （証明書失効リスト） を生成できます。
 たとえば、次のコマンドはID **peer1** のアイデンティティを失効させ、CRLを生成して **<msp folder>/crls/crl.pem** ファイルに保存します。
 
 .. code:: bash
 
     fabric-ca-client revoke -e peer1 --gencrl
-
-A CRL can also be generated using the `gencrl` command. Refer to the `Generating a CRL (Certificate Revocation List)`_
-section for more information on the `gencrl` command.
 
 CRLは、 `gencrl`コマンドを使用して生成することもできます。
 `gencrl`コマンドの詳細については、 `Generating a CRL (Certificate Revocation List)`_ セクションを参照してください。
@@ -1663,13 +1630,6 @@ Generating a CRL (Certificate Revocation List)
 
 CRL（証明書失効リスト）の生成
 
-After a certificate is revoked in the Fabric CA server, the appropriate MSPs in Hyperledger Fabric must also be updated.
-This includes both local MSPs of the peers as well as MSPs in the appropriate channel configuration blocks.
-To do this, PEM encoded CRL (certificate revocation list) file must be placed in the `crls`
-folder of the MSP. The ``fabric-ca-client gencrl`` command can be used to generate a CRL. Any identity
-with ``hf.GenCRL`` attribute can create a CRL that contains serial numbers of all certificates that were revoked
-during a certain period. The created CRL is stored in the `<msp folder>/crls/crl.pem` file.
-
 Fabric CAサーバーで証明書を失効させた後、Hyperledger Fabricの適切なMSPも更新する必要があります。
 これには、ピアのローカルMSPと適切なチャネル設定の部分にあるMSPの両方が含まれます。
 これを行うには、PEMエンコードCRL（証明書失効リスト）ファイルをMSPの `crls` フォルダーに配置する必要があります。
@@ -1677,19 +1637,12 @@ Fabric CAサーバーで証明書を失効させた後、Hyperledger Fabricの�
 ``hf.GenCRL`` 属性を持つアイデンティティは、特定の期間中に取り消されたすべての証明書のシリアル番号を含むCRLを作成できます。
 作成されたCRLは、 `<msp folder>/crls/crl.pem` ファイルに保存されます。
 
-The following command will create a CRL containing all the revoked certficates (expired and unexpired) and
-store the CRL in the `~/msp/crls/crl.pem` file.
-
 次のコマンドは、失効したすべての証明書（期限切れおよび期限切れなし）を含むCRLを作成し、CRLを `~/msp/crls/crl.pem` ファイルに保存します。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
     fabric-ca-client gencrl -M ~/msp
-
-The next command will create a CRL containing all certificates (expired and unexpired) that were revoked after
-2017-09-13T16:39:57-08:00 (specified by the `--revokedafter` flag) and before 2017-09-21T16:39:57-08:00
-(specified by the `--revokedbefore` flag) and store the CRL in the `~/msp/crls/crl.pem` file.
 
 次のコマンドは、すべての失効した証明書（期限切れおよび期限切れなし）のCRLを作成し、`~/msp/crls/crl.pem` にファイルで保存します。
 日付の条件は、2017-09-13T16：39：57-08：00 （ `--revokedafter` フラグで指定） 以降、
@@ -1701,31 +1654,15 @@ The next command will create a CRL containing all certificates (expired and unex
     fabric-ca-client gencrl --caname "" --revokedafter 2017-09-13T16:39:57-08:00 --revokedbefore 2017-09-21T16:39:57-08:00 -M ~/msp
 
 
-The `--caname` flag specifies the name of the CA to which this request is sent. In this example, the gencrl request is
-sent to the default CA.
-
 `--caname` フラグは、このリクエストが送信されるCAの名前を指定します。 
 この例では、 gencrl リクエストは、デフォルトCAに送信されます。
-
-The `--revokedafter` and `--revokedbefore` flags specify the lower and upper boundaries of a time period.
-The generated CRL will contain certificates that were revoked in this time period. The values must be UTC
-timestamps specified in RFC3339 format. The `--revokedafter` timestamp cannot be greater than the
-`--revokedbefore` timestamp.
 
 `--revokedafter` および `--revokedbefore` フラグは、期間の下限と上限を指定します。
 生成されたCRLには、この期間に取り消された証明書が含まれます。 値は RFC3339 形式で指定された UTC タイムスタンプでなければなりません。 
 `--revokedafter` タイムスタンプは `--revokedbefore` タイムスタンプより大きくすることはできません。
 
-By default, 'Next Update' date of the CRL is set to next day. The `crl.expiry` CA configuration property
-can be used to specify a custom value.
-
 デフォルトでは、CRLの 'Next Update' 日付は翌日に設定されます。 
 `crl.expiry` CA設定プロパティを使用して、カスタム値を指定できます。
-
-The gencrl command will also accept `--expireafter` and `--expirebefore` flags that can be used to generate a CRL
-with revoked certificates that expire during the period specified by these flags. For example, the following command
-will generate a CRL that contains certificates that were revoked after 2017-09-13T16:39:57-08:00 and
-before 2017-09-21T16:39:57-08:00, and that expire after 2017-09-13T16:39:57-08:00 and before 2018-09-13T16:39:57-08:00
 
 gencrl コマンドは、これらのフラグで指定された期間内に失効する失効した証明書でCRLを生成するために使用できる 
 `--expireafter` および `--expirebefore` フラグも受け入れます。
@@ -1742,10 +1679,6 @@ Enabling TLS
 
 TLSを有効にする
 
-This section describes in more detail how to configure TLS for a Fabric CA client.
-
-The following sections may be configured in the ``fabric-ca-client-config.yaml``.
-
 このセクションでは、Fabric CAクライアントのTLSを構成する方法について詳しく説明します。
 
 次のセクションは ``fabric-ca-client-config.yaml`` で設定できます。
@@ -1761,14 +1694,6 @@ The following sections may be configured in the ``fabric-ca-client-config.yaml``
         certfile: tls_client-cert.pem
         keyfile: tls_client-key.pem
 
-The **certfiles** option is the set of root certificates trusted by the
-client. This will typically just be the root Fabric CA server's
-certificate found in the server's home directory in the **ca-cert.pem**
-file.
-
-The **client** option is required only if mutual TLS is configured on
-the server.
-
 **certfiles** オプションは、クライアントが信頼するルート証明書のセットです。
 これは通常、 **ca-cert.pem** ファイル内のサーバーのホームディレクトリにあるルートファブリックCAサーバーの証明書になります。
 
@@ -1779,52 +1704,21 @@ Attribute-Based Access Control
 
 属性ベースのアクセス制御
 
-Access control decisions can be made by chaincode (and by the Hyperledger Fabric runtime)
-based upon an identity's attributes.  This is called
-**Attribute-Based Access Control**, or **ABAC** for short.
-
 アクセス制御の決定は、アイデンティティの属性に基づいてチェーンコード （および Hyperledger Fabric ランタイム） によって行うことができます。
 これは、 **属性ベースのアクセス制御 : Attribute-Based Access Control** 、または略して **ABAC** と呼ばれます。
 
-In order to make this possible, an identity's enrollment certificate (ECert)
-may contain one or more attribute name and value.  The chaincode then
-extracts an attribute's value to make an access control decision.
-
 これを可能にするために、IDの登録証明書 （ECert） に1つ以上の属性名と値が含まれる場合があります。
 次に、チェーンコードは属性の値を抽出して、アクセス制御の決定を行います。
-
-For example, suppose that you are developing application *app1* and want a
-particular chaincode operation to be accessible only by app1 administrators.
-Your chaincode could verify that the caller's certificate (which was issued by
-a CA trusted for the channel) contains an attribute named *app1Admin* with a
-value of *true*.  Of course the name of the attribute can be anything and the
-value need not be a boolean value.
 
 たとえば、アプリケーション *app1* を開発しており、特定のチェーンコード操作に app1 管理者のみがアクセスできるようにするとします。
 チェーンコードは、呼び出し元の証明書 （チャネルに対して信頼されている CA によって発行された） に *app1Admin* という名前の値が *true* の属性が含まれていることを確認できます。
 もちろん、属性の名前は何でもよく、値はブール値である必要はありません。
 
-So how do you get an enrollment certificate with an attribute?
-There are two methods:
-
 属性付きの登録証明書をどのように取得するか、それには2つの方法があります。
-
-1.   When you register an identity, you can specify that an enrollment certificate
-     issued for the identity should by default contain an attribute.  This behavior
-     can be overridden at enrollment time, but this is useful for establishing
-     default behavior and, assuming registration occurs outside of your application,
-     does not require any application change.
 
 1.   アイデンティティを登録するときに、アイデンティティに対して発行される登録証明書にデフォルトで属性が含まれるように指定できます。
      この動作は、登録時にオーバーライドできますが、これはデフォルトの動作を確立するのに役立ち、
      アプリケーションの外部で登録が行われる場合、アプリケーションの変更は不要です。
-
-     The following shows how to register *user1* with two attributes:
-     *app1Admin* and *email*.
-     The ":ecert" suffix causes the *appAdmin* attribute to be inserted into user1's
-     enrollment certificate by default, when the user does not explicitly request
-     attributes at enrollment time.  The *email* attribute is not added
-     to the enrollment certificate by default.
 
      以下は、 *user1* を、次の2つの属性、 *app1Admin* と  *email* で登録する方法を示しています。
      「：ecert」サフィックスにより、ユーザーが登録時に明示的に属性を要求しない場合、デフォルトで *appAdmin* 属性が user1 の登録証明書に挿入されます。
@@ -1834,19 +1728,9 @@ There are two methods:
 
      fabric-ca-client register --id.name user1 --id.secret user1pw --id.type client --id.affiliation org1 --id.attrs 'app1Admin=true:ecert,email=user1@gmail.com'
 
-2. When you enroll an identity, you may explicitly request that one or more attributes
-   be added to the certificate.
-   For each attribute requested, you may specify whether the attribute is
-   optional or not.  If it is not requested optionally and the identity does
-   not possess the attribute, an error will occur.
-
 2. IDを登録するときに、1つ以上の属性を証明書に追加することを明示的に要求できます。
    要求された属性ごとに、属性がオプションかどうかを指定できます。
    オプションで要求されず、IDに属性がない場合、エラーが発生します。
-
-   The following shows how to enroll *user1* with the *email* attribute,
-   without the *app1Admin* attribute, and optionally with the *phone*
-   attribute (if the user possesses the *phone* attribute).
 
    以下に、*user1* を *email* 属性で登録し、*app1Admin* 属性なしで、
    オプションで *phone* 属性を登録する方法を示します（ユーザーが *phone* 属性を所有している場合）。
@@ -1854,8 +1738,6 @@ There are two methods:
 .. code:: bash
 
    fabric-ca-client enroll -u http://user1:user1pw@localhost:7054 --enrollment.attrs "email,phone:opt"
-
-The table below shows the three attributes which are automatically registered for every identity.
 
 次の表は、すべてのIDに対して自動的に登録される3つの属性を示しています。
 
@@ -1867,14 +1749,6 @@ The table below shows the three attributes which are automatically registered fo
   hf.Affiliation                         アイデンティティの所属
 ===================================   =====================================
 
-To add any of the above attributes **by default** to a certificate, you must
-explicitly register the attribute with the ":ecert" specification.
-For example, the following registers identity 'user1' so that
-the 'hf.Affiliation' attribute will be added to an enrollment certificate if
-no specific attributes are requested at enrollment time.  Note that the
-value of the affiliation (which is 'org1') must be the same in both the
-'--id.affiliation' and the '--id.attrs' flags.
-
 上記の属性のいずれかを **デフォルトで** 証明書に追加するには、「:ecert」仕様で属性を明示的に登録する必要があります。
 たとえば、以下は、登録時に特定の属性が要求されない場合に登録証明書に「hf.Affiliation」属性が追加されるように、アイデンティティ「user1」を登録します。
 アフィリエーションの値（「org1」）は、「--id.affiliation」フラグと「--id.attrs」フラグの両方で同じでなければならないことに注意してください。
@@ -1882,9 +1756,6 @@ value of the affiliation (which is 'org1') must be the same in both the
 .. code:: bash
 
     fabric-ca-client register --id.name user1 --id.secret user1pw --id.type client --id.affiliation org1 --id.attrs 'hf.Affiliation=org1:ecert'
-
-For information on the chaincode library API for Attribute-Based Access Control,
-see `https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md>`_
 
 属性ベースのアクセス制御用のチェーンコードライブラリAPIについては、以下を参照してください  
 `https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/lib/cid/README.md>`_
@@ -1894,14 +1765,8 @@ Dynamic Server Configuration Update
 
 動的サーバー構成の更新
 
-This section describes how to use fabric-ca-client to dynamically update portions
-of the fabric-ca-server's configuration without restarting the server.
-
 このセクションでは、 fabric-ca-client を使用して、サーバーを再起動せずに fabric-ca-server の構成の一部を
 動的に更新する方法について説明します。
-
-All commands in this section require that you first be enrolled by executing the
-`fabric-ca-client enroll` command.
 
 このセクションのすべてのコマンドでは、最初に「fabric-ca-client enroll」コマンドを実行して登録する必要があります。
 
@@ -1910,34 +1775,17 @@ Dynamically updating identities
 
 アイデンティティを動的に更新する
 
-This section describes how to use fabric-ca-client to dynamically update identities.
-
 このセクションでは、 fabric-ca-client を使用してアイデンティティを動的に更新する方法について説明します。
-
-An authorization failure will occur if the client identity does not satisfy all of the following:
 
 クライアントのアイデンティティが次のすべてを満たしていない場合、認証エラーが発生します。
 
- - The client identity must possess the "hf.Registrar.Roles" attribute with a comma-separated list of
-   values where one of the values equals the type of identity being updated; for example, if the client's
-   identity has the "hf.Registrar.Roles" attribute with a value of "client", the client can update
-   identities of type 'client', but not 'peer'.
-   
  - クライアントのアイデンティティには、値の1つが更新されるIDのタイプに等しい値のコンマ区切りリストを持つ「hf.Registrar.Roles」属性が必要です。  
    たとえば、クライアントのアイデンティティに「hf.Registrar.Roles」属性があり、その値が値「client」の場合、
    クライアントは種別が「peer」ではなく「client」のアイデンティティを更新できます。
 
- - The affiliation of the client's identity must be equal to or a prefix of the affiliation of the identity
-   being updated.  For example, a client with an affiliation of "a.b" may update an identity with an affiliation
-   of "a.b.c" but may not update an identity with an affiliation of "a.c". If root affiliation is required for an
-   identity, then the update request should specify a dot (".") for the affiliation and the client must also have
-   root affiliation.
-
  - クライアントのアイデンティティの所属 (affiliation) は、更新されるアイデンティティの所属と等しいか、プレフィックスである必要があります。  
    たとえば、「a.b」の所属を持つクライアントは、「a.b.c」の所属を持つアイデンティティを更新できますが、「a.c」の所属を持つアイデンティティは更新できません。
    アイデンティティにルート所属が必要な場合、更新要求は所属にドット（"."）を指定する必要があり、クライアントにもルート所属が必要です。
-
-The following shows how to add, modify, and remove an affiliation.
 
 以下に、所属を追加、変更、削除する方法を示しています。
 
@@ -1946,19 +1794,12 @@ Getting Identity Information
 
 アイデンティティ情報の取得
 
-A caller may retrieve information on a identity from the fabric-ca server as long as the caller meets
-the authorization requirements highlighted in the section above. The following command shows how to get an
-identity.
-
 発信者は、上記のセクションで強調表示されている承認要件を満たしている限り、fabric CA サーバーからアイデンティティに関する情報を取得できます。  
 次のコマンドは、アイデンティティを取得する方法を示しています。
 
 .. code:: bash
 
     fabric-ca-client identity list --id user1
-
-A caller may also request to retrieve information on all identities that it is authorized to see by
-issuing the following command.
 
 呼び出し元は、次のコマンドを発行することにより、表示が許可されているすべてのアイデンティティに関する情報の取得を要求することもできます。
 
@@ -1971,10 +1812,6 @@ Adding an identity
 
 アイデンティティを追加する
 
-The following adds a new identity for 'user1'. Adding a new identity performs the same action as registering an
-identity via the 'fabric-ca-client register' command. There are two available methods for adding a new identity.
-The first method is via the `--json` flag where you describe the identity in a JSON string.
-
 以下は、「user1」の新しいアイデンティティを追加します。 新しいアイデンティティを追加すると、
 「fabric-ca-client register」コマンドを使用してアイデンティティを登録するのと同じアクションが実行されます。 
 新しいアイデンティティを追加する方法は2つあります。
@@ -1984,8 +1821,6 @@ The first method is via the `--json` flag where you describe the identity in a J
 
     fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "client", "affiliation": "org1", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
 
-The following adds a user with root affiliation. Note that an affiliation name of "." means the root affiliation.
-
 以下は、ルート所属のユーザーを追加します。 所属名が「.」であることに注意してください。  
 ルート所属を意味します。
 
@@ -1993,16 +1828,12 @@ The following adds a user with root affiliation. Note that an affiliation name o
 
     fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "client", "affiliation": ".", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
 
-The second method for adding an identity is to use direct flags. See the example below for adding 'user1'.
-
 アイデンティティを追加する2番目の方法は、直接フラグを使用することです。  
 「user1」の追加については、以下の例を参照してください。
 
 .. code:: bash
 
     fabric-ca-client identity add user1 --secret user1pw --type client --affiliation . --maxenrollments 1 --attrs hf.Revoker=true
-
-The table below lists all the fields of an identity and whether they are required or optional, and any default values they might have.
 
 以下の表は、アイデンティティのすべてのフィールド、それらが必須またはオプションであるかどうか、およびそれらがデフォルト値として入る可能性のある値の一覧です。
 
@@ -2028,17 +1859,9 @@ Modifying an identity
 
 アイデンティティの変更
 
-There are two available methods for modifying an existing identity. The first method is via the `--json` flag where you describe
-the modifications in to an identity in a JSON string. Multiple modifications can be made in a single request. Any element of an identity that
-is not modified will retain its original value.
-
 既存のアイデンティを変更する方法は2つあります。
 最初の方法は、 `--json` フラグを使用して、JSON文字列でアイデンティの変更を記述する方法です。
 1つのリクエストで複数の変更を行うことができます。 変更されていないアイデンティティの要素は、元の値を保持します。
-
-NOTE: A maxenrollments value of "-2" specifies that the CA's max enrollment setting is to be used.
-
-The command below make multiple modification to an identity using the --json flag.
 
 注：maxenrollments の値が「-2」になっているのは、CAの最大登録設定が使用されることを指定します。
 
@@ -2048,8 +1871,6 @@ The command below make multiple modification to an identity using the --json fla
 
     fabric-ca-client identity modify user1 --json '{"secret": "newPassword", "affiliation": ".", "attrs": [{"name": "hf.Regisrar.Roles", "value": "peer,client"},{"name": "hf.Revoker", "value": "true"}]}'
 
-The commands below make modifications using direct flags. The following updates the enrollment secret (or password) for identity 'user1' to 'newsecret'.
-
 以下のコマンドは、直接フラグを使用して変更を加えます。
 ID「user1」の登録シークレット（またはパスワード）を「newsecret」に更新します。
 
@@ -2057,15 +1878,11 @@ ID「user1」の登録シークレット（またはパスワード）を「news
 
     fabric-ca-client identity modify user1 --secret newsecret
 
-The following updates the affiliation of identity 'user1' to 'org2'.
-
 以下は、ID「user1」の所属を「org2」に更新します。
 
 .. code:: bash
 
     fabric-ca-client identity modify user1 --affiliation org2
-
-The following updates the type of identity 'user1' to 'peer'.
 
 以下は、ID「user1」のタイプを「peer」に更新します。
 
@@ -2073,28 +1890,17 @@ The following updates the type of identity 'user1' to 'peer'.
 
     fabric-ca-client identity modify user1 --type peer
 
-
-The following updates the maxenrollments of identity 'user1' to 5.
-
 以下は、ID 「user1」の maxenrollments を 5 に更新します。
 
 .. code:: bash
 
     fabric-ca-client identity modify user1 --maxenrollments 5
 
-By specifying a maxenrollments value of '-2', the following causes identity 'user1' to use
-the CA's max enrollment setting.
-
 「-2」のmaxenrollments値を指定することにより、ID「user1」は CA の最大登録設定を使用します。
 
 .. code:: bash
 
     fabric-ca-client identity modify user1 --maxenrollments -2
-
-The following sets the value of the 'hf.Revoker' attribute for identity 'user1' to 'false'.
-If the identity has other attributes, they are not changed.  If the identity did not previously
-possess the 'hf.Revoker' attribute, the attribute is added to the identity. An attribute may
-also be removed by specifying no value for the attribute.
 
 以下は、ID「user1」の「hf.Revoker」属性の値を「false」に設定します。
 IDに他の属性がある場合、それらは変更されません。
@@ -2105,16 +1911,11 @@ IDが以前に 'hf.Revoker'属性を所有していなかった場合、属性�
 
     fabric-ca-client identity modify user1 --attrs hf.Revoker=false
 
-The following removes the 'hf.Revoker' attribute for user 'user1'.
-
 以下は、ユーザー「user1」の「hf.Revoker」属性を削除します。
 
 .. code:: bash
 
     fabric-ca-client identity modify user1 --attrs hf.Revoker=
-
-The following demonstrates that multiple options may be used in a single `fabric-ca-client identity modify`
-command. In this case, both the secret and the type are updated for user 'user1'.
 
 以下は、単一の「fabric-ca-client identity modify」コマンドで複数のオプションを使用できることを示しています。 
 この場合、ユーザー 「user1」のシークレットと種別の両方が更新されます。
@@ -2128,16 +1929,11 @@ Removing an identity
 
 アイデンティティの削除
 
-The following removes identity 'user1' and also revokes any certificates associated with the 'user1' identity.
-
 次の例では、ID「user1」を削除し、「user1」 アイデンティに関連付けられているすべての証明書を失効させます。
 
 .. code:: bash
 
     fabric-ca-client identity remove user1
-
-Note: Removal of identities is disabled in the fabric-ca-server by default, but may be enabled
-by starting the fabric-ca-server with the `--cfg.identities.allowremove` option.
 
 注：アイデンティティの削除はデフォルトで fabric-ca-server で無効になっていますが、
 `--cfg.identities.allowremove` オプションで fabric-ca-server を起動することで有効にできます。
@@ -2147,9 +1943,6 @@ Dynamically updating affiliations
 
 所属を動的に更新する
 
-This section describes how to use fabric-ca-client to dynamically update affiliations. The
-following shows how to add, modify, remove, and list an affiliation.
-
 このセクションでは、 fabric-ca-client を使用して所属を動的に更新する方法について説明します。 
 以下に、アフィリエーションを追加、変更、削除、およびリストする方法を示します。
 
@@ -2158,23 +1951,11 @@ Adding an affiliation
 
 所属を追加する
 
-An authorization failure will occur if the client identity does not satisfy all of the following:
-
-  - The client identity must possess the attribute 'hf.AffiliationMgr' with a value of 'true'.
-  - The affiliation of the client identity must be hierarchically above the affiliation being updated.
-    For example, if the client's affiliation is "a.b", the client may add affiliation "a.b.c" but not
-    "a" or "a.b".
-
-The following adds a new affiliation named ‘org1.dept1’.
-
-
 クライアントのアイデンティが次のすべてを満たしていない場合、認証エラーが発生します。
 
   - クライアントのアイデンティは、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。
   - クライアントIDの所属は、更新される所属の上に階層的になければなりません。
     たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a」または「a.b」を追加できませんが、「a.b.c」を追加できます。
-
-The following adds a new affiliation named ‘org1.dept1’.
 
 以下は、「org1.dept1」という名前の新しい所属を追加します。
 
@@ -2186,18 +1967,6 @@ Modifying an affiliation
 """""""""""""""""""""""""
 
 所属の変更
-
-An authorization failure will occur if the client identity does not satisfy all of the following:
-
-  - The client identity must possess the attribute 'hf.AffiliationMgr' with a value of 'true'.
-  - The affiliation of the client identity must be hierarchically above the affiliation being updated.
-    For example, if the client's affiliation is "a.b", the client may add affiliation "a.b.c" but not
-    "a" or "a.b".
-  - If the '--force' option is true and there are identities which must be modified, the client
-    identity must also be authorized to modify the identity.
-
-The following renames the 'org2' affiliation to 'org3'.  It also renames any sub affiliations
-(e.g. 'org2.department1' is renamed to 'org3.department1').
 
 クライアントのアイデンティが次のすべてを満たしていない場合、認証エラーが発生します。  
 
@@ -2214,10 +1983,6 @@ The following renames the 'org2' affiliation to 'org3'.  It also renames any sub
 
     fabric-ca-client affiliation modify org2 --name org3
 
-If there are identities that are affected by the renaming of an affiliation, it will result in
-an error unless the '--force' option is used. Using the '--force' option will update the affiliation
-of identities that are affected to use the new affiliation name.
-
 所属の名前変更の影響を受けるアイデンティティがある場合、「--force」オプションを使用しない限りエラーになります。  
 「--force」オプションを使用すると、影響を受けるアイデンティティの所属が更新され、新しい所属名が使用されます。  
 
@@ -2230,18 +1995,6 @@ Removing an affiliation
 
 所属の削除
 
-An authorization failure will occur if the client identity does not satisfy all of the following:
-
-  - The client identity must possess the attribute 'hf.AffiliationMgr' with a value of 'true'.
-  - The affiliation of the client identity must be hierarchically above the affiliation being updated.
-    For example, if the client's affiliation is "a.b", the client may remove affiliation "a.b.c" but not
-    "a" or "a.b".
-  - If the '--force' option is true and there are identities which must be modified, the client
-    identity must also be authorized to modify the identity.
-
-The following removes affiliation 'org2' and also any sub affiliations.
-For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
-
 クライアントIDが次のすべてを満たしていない場合、認証エラーが発生します。  
 
 
@@ -2251,9 +2004,6 @@ For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
     たとえば、クライアントの所属が「a.b」の場合、クライアントは所属「a」または「a.b」を削除できませんが、「a.b.c」を削除できます。  
   - 「--force」オプションがtrueであり、変更する必要があるアイデンティが存在する場合、クライアントのアイデンティにアイデンティを変更する権限が必要です。  
 
-The following removes affiliation 'org2' and also any sub affiliations.
-For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
-
 以下は、所属「org2」および、それにつらなる従属する所属も削除します。
 たとえば、「org2.dept1」が「org2」に従属する所属である場合、それも削除されます。
 
@@ -2261,17 +2011,9 @@ For example, if 'org2.dept1' is an affiliation below 'org2', it is also removed.
 
     fabric-ca-client affiliation remove org2
 
-If there are identities that are affected by the removing of an affiliation, it will result
-in an error unless the '--force' option is used. Using the '--force' option will also remove
-all identities that are associated with that affiliation, and the certificates associated with
-any of these identities.
-
 所属の削除により影響を受けるアイデンティティがある場合、「--force」オプションを使用しない限りエラーになります。
 「--force」オプションを使用すると、そのアフィリエーションに関連付けられているすべてのアイデンティティ、
 およびこれらのアイデンティティのいずれかに関連付けられている証明書も削除されます。
-
-Note: Removal of affiliations is disabled in the fabric-ca-server by default, but may be enabled
-by starting the fabric-ca-server with the `--cfg.affiliations.allowremove` option.
 
 注：アフィリエーションの削除は、デフォルトでは fabric-ca-server で無効になっていますが、 
 `--cfg.affiliations.allowremove` オプションで fabric-ca-server を起動することで有効にできます。
@@ -2281,20 +2023,8 @@ Listing affiliation information
 
 所属情報のリスト
 
-An authorization failure will occur if the client identity does not satisfy all of the following:
-
-  - The client identity must possess the attribute 'hf.AffiliationMgr' with a value of 'true'.
-  - Affiliation of the client identity must be equal to or be hierarchically above the
-    affiliation being updated. For example, if the client's affiliation is "a.b",
-    the client may get affiliation information on "a.b" or "a.b.c" but not "a" or "a.c".
-
-The following command shows how to get a specific affiliation.
-
 クライアントIDが次のすべてを満たしていない場合、認証エラーが発生します。
 
-  - Affiliation of the client identity must be equal to or be hierarchically above the
-    affiliation being updated. For example, if the client's affiliation is "a.b",
-    the client may get affiliation information on "a.b" or "a.b.c" but not "a" or "a.c".
   - クライアントのアイデンティには、属性「hf.AffiliationMgr」が存在し、値が「true」である必要があります。  
   - クライアントアイデンティティのアフィリエーションは、更新されるアフィリエーションに対して従属する階層になければなりません。  
     クライアントアイデンティの所属は、取得する所属に対して従属する階層になければなりません。  
@@ -2306,9 +2036,6 @@ The following command shows how to get a specific affiliation.
 .. code:: bash
 
     fabric-ca-client affiliation list --affiliation org2.dept1
-
-A caller may also request to retrieve information on all affiliations that it is authorized to see by
-issuing the following command.
 
 呼び出し元は、次のコマンドを発行することにより、表示を許可されているすべての所属に関する情報の取得を要求することもできます。
 
