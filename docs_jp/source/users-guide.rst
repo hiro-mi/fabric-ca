@@ -2046,18 +2046,30 @@ Listing affiliation information
 Manage Certificates
 ~~~~~~~~~~~~~~~~~~~~
 
+証明書を管理する
+
 This section describes how to use fabric-ca-client to manage certificates.
+
+このセクションでは、fabric-ca-clientを使用して証明書を管理する方法について説明します。
 
 Listing certificate information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+証明書情報のリスト
+
 The certificates that are visible to a caller include:
+
+呼び出し元に表示される証明書には次のものが含まれます。
 
   - Those certificates which belong to the caller
   - If the caller possesses the ``hf.Registrar.Roles`` attribute or the ``hf.Revoker`` attribute with a value of ``true``,
     all certificates which belong to identities in and below the caller's affiliation. For example, if the client's
     affiliation is ``a.b``, the client may get certificates for identities who's affiliation
     is ``a.b`` or ``a.b.c`` but not ``a`` or ``a.c``.
+
+   - 呼び出し元に属する証明書  
+   - 呼び出し元の ``hf.Registrar.Roles`` 属性が ``true``、または ``hf.Revoker`` 属性の値が ``true`` である場合、呼び出し元の所属内およびその下のIDに属するすべての証明書。  
+     たとえば、クライアントの所属が「a.b」の場合、クライアントは「a.b」または「a.b.c」であるが「a」または「a.c」ではないアイデンティティの証明書を取得できます。 
 
 If executing a list command that requests certificates of more than one identity, only certificates of identities
 with an affiliation that is equal to or hierarchically below the caller's affiliation will be listed.
